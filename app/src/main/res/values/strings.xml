@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Weather App</string>
+    <string name="welcome_msg">Welcome, \nWeather Application</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="menu_search">Search</string>
+    <string name="menu_home">Home</string>
+    <string name="degree_symbol_celcious">°C</string>
+    <string name="unable_to_fetch_location">Unable to fetch location</string>
+    <string name="failed_to_get_location">Failed to get location: %1$s</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="no_data_available">No weather data available</string>
+    <string name="failed_to_fetch_weather">Failed to fetch weather</string>
+    <string name="network_error">Network error: %1$s</string>
+    <string name="added_to_favourite_successfully">%1$s added to favourite successfully</string>
+    <string name="error_adding_favourite">Error adding favourite: %1$s</string>
+    <string name="no_favourite_cities_found">No Favourite Cities found..</string>
+    <string name="error_while_fetching_favourite">Error while fetching favourite: %1$s</string>
+    <string name="error_while_fetching_data">Error while fetching data: %1$s</string>
+    <string name="error_while_adding_data">Error while adding data: %1$s</string>
+
+</resources>

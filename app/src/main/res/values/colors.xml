@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#71797E</color>
+    <color name="rounded_corner_box_color">#B2B3B5</color>
+    <color name="yellow">#F1F10A</color>
+    <color name="colorPrimary">#654A97</color>
+    <color name="colorPrimaryDark">#563A87</color>
+    <color name="colorAccent">#FFCB60</color>
+    <color name="backgroundColor">#897BB2</color>
+    <color name="secondaryBackgroundColor">#7258A0</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="textColorSecondary">#F3E8FF</color>
+    <color name="lightShade">#E1DFFF</color>
+    <color name="cardBackgroundColor">#59447C</color>
+
+</resources>
