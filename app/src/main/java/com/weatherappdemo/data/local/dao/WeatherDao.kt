@@ -13,6 +13,7 @@ interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addWeatherData(weather: WeatherEntity)
 
+    @Insert()
     suspend fun addFavouriteCity(weather: WeatherEntity)
 
     @Query("SELECT * FROM weather_table WHERE isFavCity = 1")

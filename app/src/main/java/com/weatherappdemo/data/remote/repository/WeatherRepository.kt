@@ -2,10 +2,12 @@ package com.weatherappdemo.data.remote.repository
 
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
+import com.weatherappdemo.data.model.ForecastDataModel
+import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.data.model.toForecastDataModelList
+import com.weatherappdemo.data.model.toWeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.data.remote.api.APIServices
-import com.weatherappdemo.data.remote.webResponse.ForecastResponse
-import com.weatherappdemo.data.remote.webResponse.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -13,18 +15,15 @@ class WeatherRepository(private val apiServices: APIServices) {
 
     private val application = MyApplication.instance
 
-    suspend fun getCurrentWeather(lat: Double, long: Double): APIResponse<WeatherResponse> =
+    suspend fun getCurrentWeather(lat: Double, lon: Double): APIResponse<WeatherData> =
         withContext(Dispatchers.IO) {
             try {
-                // Fetch weather data from repository in IO context
-                val response = apiServices.getCurrentLocationWeather(lat, long)
+                val response = apiServices.getCurrentLocationWeather(lat, lon)
 
-                // Handle the response
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        APIResponse.Success(it) // Directly return Success
-                    }
-                        ?: APIResponse.Error(application.getString(R.string.no_data_available)) // Handle null body
+                        APIResponse.Success(it.toWeatherData()) // Map to WeatherData
+                    } ?: APIResponse.Error(application.getString(R.string.no_data_available))
                 } else {
                     APIResponse.Error(application.getString(R.string.failed_to_fetch_weather))
                 }
@@ -34,16 +33,16 @@ class WeatherRepository(private val apiServices: APIServices) {
         }
 
 
-    suspend fun getWeatherForecast(cityName: String): APIResponse<ForecastResponse> =
+    suspend fun getWeatherForecast(lat: Double, lon: Double): APIResponse<List<ForecastDataModel>> =
         withContext(Dispatchers.IO)
         {
             try {
-                val response = apiServices.getWeatherForecast(cityName)
+                val response = apiServices.getWeatherForecast(lat, lon)
 
                 // Handle the response
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        APIResponse.Success(it)
+                        APIResponse.Success(it.toForecastDataModelList())
                     }
                         ?: APIResponse.Error(application.getString(R.string.no_data_available)) // Handle null body
                 } else {

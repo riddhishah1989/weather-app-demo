@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
-<data>
-    <variable
-        name="currentDay"
-        type="String" />
-    <variable
-        name="weatherData"
-        type="com.weatherappdemo.data.model.WeatherData" />
-</data>
+
+    <data>
+
+        <variable
+            name="currentDay"
+            type="String" />
+
+        <variable
+            name="weatherIconUrl"
+            type="String" />
+
+        <variable
+            name="weatherData"
+            type="com.weatherappdemo.data.model.WeatherData" />
+    </data>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/backgroundColor"
         android:orientation="vertical"
         tools:context=".ui.home.HomeFragment">
 
@@ -38,7 +46,7 @@
                     style="@style/textview_extra_large_bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{weatherData.main.temp + @string/degree_symbol_celcious}"
+                    android:text="@{weatherData.temperature + @string/degree_symbol_celcious}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -59,19 +67,79 @@
                     style="@style/textview_regular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{weatherData.name}"
+                    android:text="@{weatherData.cityName}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="@id/tvTemprature"
                     app:layout_constraintTop_toBottomOf="@id/textDay" />
 
+                <ImageView
+                    android:id="@+id/ivWeatherImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:imageUrl="@{weatherIconUrl}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@mipmap/ic_launcher" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvFavCities"
+        <TextView
+            style="@style/textview_large_bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:text="City Forcast" />
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp" />
+            android:layout_margin="16dp">
+
+            <TextView
+                android:id="@+id/tvNoDataFound"
+                style="@style/textview_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="No favorite cities found yet"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFavCities"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <TextView
+            style="@style/textview_large_bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:text="Week Forcast" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvNoDataFoundForcast"
+                style="@style/textview_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="No Upcoming forcast data"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUpcomingForcast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
 
     </LinearLayout>
 </layout>

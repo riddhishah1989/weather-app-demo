@@ -35,7 +35,7 @@ class WeatherLocalRepository private constructor() {
                 DBResponse.Success(
                     application.getString(
                         R.string.added_to_favourite_successfully,
-                        weatherData.name
+                        weatherData.cityName
                     )
                 )
             } catch (e: Exception) {
@@ -48,11 +48,12 @@ class WeatherLocalRepository private constructor() {
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val tempList = weatherDao.getFavoriteCities()
-                if (tempList.isNotEmpty()) {
+                DBResponse.Success(tempList.toWeatherDataList())
+                /*if (tempList.isNotEmpty()) {
                     DBResponse.Success(tempList.toWeatherDataList())
                 } else {
                     DBResponse.Error(application.getString(R.string.no_favourite_cities_found))
-                }
+                }*/
             } catch (e: Exception) {
                 DBResponse.Error(
                     application.getString(
@@ -95,4 +96,6 @@ class WeatherLocalRepository private constructor() {
             }
 
         }
+
+
 }
