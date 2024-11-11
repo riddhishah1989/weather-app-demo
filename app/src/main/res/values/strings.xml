@@ -17,5 +17,6 @@
     <string name="error_while_fetching_favourite">Error while fetching favourite: %1$s</string>
     <string name="error_while_fetching_data">Error while fetching data: %1$s</string>
     <string name="error_while_adding_data">Error while adding data: %1$s</string>
+    <string name="location_permission_message">Permission denied. You won\'t be able to see the weather.</string>
 
 </resources>

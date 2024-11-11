@@ -10,8 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
 import com.weatherappdemo.adapter.FavoriteCitiesAdapter
+import com.weatherappdemo.adapter.WeeklyForecastAdapter
 import com.weatherappdemo.data.local.DBResponse
-import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentHomeBinding
 import com.weatherappdemo.utils.LocationHelper
@@ -24,16 +24,16 @@ class HomeFragment : Fragment() {
     private lateinit var locationHelper: LocationHelper
     private lateinit var viewModel: WeatherViewModel
     private lateinit var adapter: FavoriteCitiesAdapter
+    private lateinit var forecastAdapter: WeeklyForecastAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
         locationHelper = LocationHelper(requireActivity(), locationPermissionLauncher)
 
-        setupRecyclerView()
+        setupFavCitiesRecyclerView()
+        setupForecastRecyclerView()
         setUpObservers()
 
         return binding.root
@@ -55,7 +55,6 @@ class HomeFragment : Fragment() {
                     binding.weatherData = currentLocationWeatherData
                     binding.weatherIconUrl =
                         Utils.getWeatherIconUrl(currentLocationWeatherData.icon)
-                    addCurrentLocationWeatherData(currentLocationWeatherData)
                     binding.textDay.text = Utils.showDayFromCurrentDate()
                 }
 
@@ -86,9 +85,23 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+
+
+        viewModel.weeklyForecast.observe(viewLifecycleOwner) { apiResponse ->
+            when (apiResponse) {
+                is APIResponse.Success -> {
+                    // Update RecyclerView with the weekly forecast
+                    forecastAdapter.addData(apiResponse.data)
+                }
+
+                is APIResponse.Error -> {
+                    Utils.showToast(requireActivity(), apiResponse.message)
+                }
+            }
+        }
     }
 
-    private fun setupRecyclerView() {
+    private fun setupFavCitiesRecyclerView() {
         adapter = FavoriteCitiesAdapter()
         binding.rvFavCities.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.HORIZONTAL
@@ -97,14 +110,25 @@ class HomeFragment : Fragment() {
         binding.rvFavCities.adapter = adapter
 
         viewModel.getFavCitiesData() // Fetch favourite cities
+
+
+    }
+
+    private fun setupForecastRecyclerView() {
+        forecastAdapter = WeeklyForecastAdapter()
+        binding.rvUpcomingForcast.layoutManager = LinearLayoutManager(requireContext()).apply {
+            orientation = LinearLayoutManager.HORIZONTAL
+            isSmoothScrollbarEnabled = true
+        }
+        binding.rvUpcomingForcast.adapter = forecastAdapter
     }
 
     private fun getWeatherDataByLocation(latitude: Double, longitude: Double) {
         viewModel.getCurrentLocationWeather(latitude, longitude)
     }
 
-    private fun addCurrentLocationWeatherData(data: WeatherData) {
-        viewModel.addSearchedCity(data)
+    private fun getWeeklyForecastData(latitude: Double, longitude: Double) {
+        viewModel.fetchWeeklyForecast(latitude, longitude)
     }
 
     private val locationPermissionLauncher = registerForActivityResult(
@@ -113,11 +137,12 @@ class HomeFragment : Fragment() {
         if (isGranted) {
             locationHelper.checkAndRequestLocationPermission { (latitude, longitude) ->
                 getWeatherDataByLocation(latitude, longitude)
+                getWeeklyForecastData(latitude, longitude)
             }
         } else {
             Utils.showToast(
                 requireActivity(),
-                "Permission denied. You won't be able to see the weather."
+                getString(R.string.location_permission_message)
             )
         }
     }

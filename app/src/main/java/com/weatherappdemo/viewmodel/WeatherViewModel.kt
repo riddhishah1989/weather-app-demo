@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.data.local.DBResponse
-import com.weatherappdemo.data.model.ForecastDataModel
+import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.data.remote.api.RetrofitClient
@@ -35,8 +35,12 @@ class WeatherViewModel : BaseViewModel() {
     val getCurrentWeather: LiveData<APIResponse<WeatherData>> = _getCurrentWeather
 
 
-    private val _getForecastWeather = MutableLiveData<APIResponse<List<ForecastDataModel>>>()
-    val getForecastWeather: LiveData<APIResponse<List<ForecastDataModel>>> = _getForecastWeather
+    private val _getForecastWeather = MutableLiveData<APIResponse<List<ForecastData>>>()
+    val getForecastWeather: LiveData<APIResponse<List<ForecastData>>> = _getForecastWeather
+
+
+    private val _weeklyForecast = MutableLiveData<APIResponse<List<ForecastData>>>()
+    val weeklyForecast: LiveData<APIResponse<List<ForecastData>>> = _weeklyForecast
 
 
     fun getCurrentLocationWeather(lat: Double, long: Double) {
@@ -101,6 +105,13 @@ class WeatherViewModel : BaseViewModel() {
             val result = localRepository.getOfflineWeatherData()
             _offlineDataList.postValue(result)
             hideLoading()
+        }
+    }
+
+    fun fetchWeeklyForecast(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            val result = apiRepository.getWeeklyForecast(lat, lon)
+            _weeklyForecast.postValue(result)
         }
     }
 }

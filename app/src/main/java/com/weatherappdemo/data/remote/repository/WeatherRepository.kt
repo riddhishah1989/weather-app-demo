@@ -2,10 +2,11 @@ package com.weatherappdemo.data.remote.repository
 
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
-import com.weatherappdemo.data.model.ForecastDataModel
+import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.model.toForecastDataModelList
 import com.weatherappdemo.data.model.toWeatherData
+import com.weatherappdemo.data.model.toWeeklyForecastDataModelList
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.data.remote.api.APIServices
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ class WeatherRepository(private val apiServices: APIServices) {
         }
 
 
-    suspend fun getWeatherForecast(lat: Double, lon: Double): APIResponse<List<ForecastDataModel>> =
+    suspend fun getWeatherForecast(lat: Double, lon: Double): APIResponse<List<ForecastData>> =
         withContext(Dispatchers.IO)
         {
             try {
@@ -52,5 +53,22 @@ class WeatherRepository(private val apiServices: APIServices) {
                 APIResponse.Error(application.getString(R.string.network_error, e.message))
             }
         }
+
+    suspend fun getWeeklyForecast(lat: Double, lon: Double): APIResponse<List<ForecastData>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiServices.getWeatherForecast(lat, lon)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        APIResponse.Success(it.toWeeklyForecastDataModelList())
+                    } ?: APIResponse.Error(application.getString(R.string.no_data_available))
+                } else {
+                    APIResponse.Error(application.getString(R.string.failed_to_fetch_weather))
+                }
+            } catch (e: Exception) {
+                APIResponse.Error(application.getString(R.string.network_error, e.message))
+            }
+        }
+    }
 
 }
