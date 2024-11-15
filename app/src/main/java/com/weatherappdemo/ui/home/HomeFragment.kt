@@ -7,54 +7,99 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
-import com.weatherappdemo.adapter.FavoriteCitiesAdapter
+import com.weatherappdemo.adapter.FavouriteCitiesAdapter
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
 import com.weatherappdemo.data.local.DBResponse
+import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentHomeBinding
+import com.weatherappdemo.ui.customView.CustomProgressDialog
 import com.weatherappdemo.utils.LocationHelper
 import com.weatherappdemo.utils.LogUtils
 import com.weatherappdemo.utils.Utils
 import com.weatherappdemo.viewmodel.WeatherViewModel
+import kotlin.math.roundToInt
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var locationHelper: LocationHelper
     private lateinit var viewModel: WeatherViewModel
-    private lateinit var adapter: FavoriteCitiesAdapter
+    private lateinit var adapter: FavouriteCitiesAdapter
     private lateinit var forecastAdapter: WeeklyForecastAdapter
+    private lateinit var progressDialog: CustomProgressDialog
+    private lateinit var currentLocationWeather: WeatherData
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
-
-        locationHelper = LocationHelper(requireActivity(), locationPermissionLauncher)
-
-        setupFavCitiesRecyclerView()
-        setupForecastRecyclerView()
-        setUpObservers()
-
+        viewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        progressDialog = CustomProgressDialog(requireActivity())
+        init()
         return binding.root
     }
 
+    private fun init() {
+        getLocationData()
+        setupFavCitiesRecyclerView()
+        setupForecastRecyclerView()
+
+        binding.favCardView.setOnClickListener {
+            if (binding.weatherData != null) {
+                progressDialog.show()
+                viewModel.addFavCity(currentLocationWeather)
+            } else {
+                Utils.showToast(requireActivity(), "Unable to add your location to favourites.")
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        locationHelper.checkAndRequestLocationPermission()
+    }
+
+    private fun getLocationData() {
+        locationHelper = LocationHelper(
+            requireActivity(),
+            requestPermissionLauncher
+        ) { latitude, longitude ->
+            Utils.showToast(requireActivity(), "Lat = $latitude, long = $longitude")
+            setUpObservers()
+            getWeatherDataByLocation(latitude, longitude)
+            getFiveDaysForecastData(latitude, longitude)
+        }
+    }
+
     private fun setUpObservers() {
+        progressDialog.show()
+
         // Observe current weather data
         viewModel.getCurrentWeather.observe(viewLifecycleOwner) { apiResponse ->
+            progressDialog.dismiss()
             LogUtils.log(message = "Observer called and response $apiResponse")
+
             if (apiResponse == null) {
                 Utils.showToast(requireActivity(), getString(R.string.no_data_available))
                 return@observe
             }
             when (apiResponse) {
                 is APIResponse.Success -> {
-                    LogUtils.log(message = "Success called")
-                    val currentLocationWeatherData = apiResponse.data
-                    LogUtils.log(message = "Data = $currentLocationWeatherData")
-                    binding.weatherData = currentLocationWeatherData
-                    binding.weatherIconUrl =
-                        Utils.getWeatherIconUrl(currentLocationWeatherData.icon)
+                    currentLocationWeather = apiResponse.data
+                    LogUtils.log(message = "Data = $currentLocationWeather")
+
+                    currentLocationWeather.apply {
+                        temperature = temperature.roundToInt().toDouble()
+                    }
+
+                    binding.weatherData = currentLocationWeather
+                    val imageUrl = Utils.getWeatherIconUrl(currentLocationWeather.icon)
+                    LogUtils.log("URL = $imageUrl")
+                    binding.weatherIconUrl = imageUrl
+
                     binding.textDay.text = Utils.showDayFromCurrentDate()
                 }
 
@@ -86,11 +131,13 @@ class HomeFragment : Fragment() {
             }
         }
 
-
+        //forcast for next 5 days
         viewModel.weeklyForecast.observe(viewLifecycleOwner) { apiResponse ->
+            progressDialog.dismiss()
             when (apiResponse) {
                 is APIResponse.Success -> {
                     // Update RecyclerView with the weekly forecast
+                    LogUtils.log("Size ${apiResponse.data.size}")
                     forecastAdapter.addData(apiResponse.data)
                 }
 
@@ -102,7 +149,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupFavCitiesRecyclerView() {
-        adapter = FavoriteCitiesAdapter()
+        adapter = FavouriteCitiesAdapter()
         binding.rvFavCities.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.HORIZONTAL
             isSmoothScrollbarEnabled = true
@@ -117,7 +164,7 @@ class HomeFragment : Fragment() {
     private fun setupForecastRecyclerView() {
         forecastAdapter = WeeklyForecastAdapter()
         binding.rvUpcomingForcast.layoutManager = LinearLayoutManager(requireContext()).apply {
-            orientation = LinearLayoutManager.HORIZONTAL
+            orientation = LinearLayoutManager.VERTICAL
             isSmoothScrollbarEnabled = true
         }
         binding.rvUpcomingForcast.adapter = forecastAdapter
@@ -127,24 +174,25 @@ class HomeFragment : Fragment() {
         viewModel.getCurrentLocationWeather(latitude, longitude)
     }
 
-    private fun getWeeklyForecastData(latitude: Double, longitude: Double) {
-        viewModel.fetchWeeklyForecast(latitude, longitude)
+    private fun getFiveDaysForecastData(latitude: Double, longitude: Double) {
+        LogUtils.log("getFiveDaysForecastData() $latitude, $longitude")
+        viewModel.fetchFiveDaysForecast(latitude, longitude)
     }
 
-    private val locationPermissionLauncher = registerForActivityResult(
+
+    private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            locationHelper.checkAndRequestLocationPermission { (latitude, longitude) ->
-                getWeatherDataByLocation(latitude, longitude)
-                getWeeklyForecastData(latitude, longitude)
-            }
+            locationHelper.checkAndRequestLocationPermission()
         } else {
-            Utils.showToast(
-                requireActivity(),
-                getString(R.string.location_permission_message)
-            )
+            Utils.showToast(requireActivity(), "Location permission denied")
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        locationHelper.stopLocationUpdates()
     }
 }
 

@@ -94,6 +94,7 @@ dependencies {
 // Add this for Navigation Components
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.3")
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
 
 
 }

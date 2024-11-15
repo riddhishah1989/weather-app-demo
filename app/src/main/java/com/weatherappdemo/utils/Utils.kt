@@ -6,7 +6,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import com.weatherappdemo.R
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -44,5 +46,26 @@ object Utils {
 
     fun getWeatherIconUrl(iconName: String): String {
         return String.format(AppConstants.WEATHER_ICON_URL, iconName)
+    }
+
+    fun formatTemperature(context: Context, temperature: Double): String {
+        val celcious = context.getString(R.string.degree_symbol_celcious)
+        return String.format("%.1f$celcious", temperature)
+    }
+
+    fun formatToDayOfWeek(dateTime: String): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val date = sdf.parse(dateTime)
+        val dayOfWeekFormat = SimpleDateFormat("EEE", Locale.getDefault())
+        val dayOfWeek = dayOfWeekFormat.format(date)
+
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        return when (Calendar.getInstance()
+            .get(Calendar.DAY_OF_YEAR) - calendar.get(Calendar.DAY_OF_YEAR)) {
+            0 -> "Today"
+            1 -> "Tomorrow"
+            else -> dayOfWeek
+        }
     }
 }

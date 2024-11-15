@@ -1,60 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
         <variable
             name="forecast"
             type="com.weatherappdemo.data.model.ForecastData" />
+
+        <variable
+            name="iconURL"
+            type="String" />
+
+        <variable
+            name="degreeSymbol"
+            type="String" />
     </data>
 
-    <androidx.cardview.widget.CardView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:background="@color/white"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp">
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        android:padding="8dp"
+        tools:background="@color/secondaryBackgroundColor">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
+            <!-- Day Name -->
             <TextView
                 android:id="@+id/tv_day"
-                android:layout_width="wrap_content"
+                style="@style/textview_regular"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:gravity="center"
                 android:text="@{forecast.dateTime}"
-                android:textAppearance="?attr/textAppearanceBody2"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                tools:text="Mon" />
 
+            <!-- Weather Icon -->
             <ImageView
                 android:id="@+id/iv_weather_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="8dp"
-                app:imageUrl="@{forecast.icon}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_day" />
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginHorizontal="8dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:imageUrl="@{iconURL}"
+                tools:srcCompat="@mipmap/ic_launcher" />
 
-            <TextView
-                android:id="@+id/tv_temperature"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textAppearance="?attr/textAppearanceBody1"
-                android:textColor="@color/black"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/iv_weather_icon" />
+                android:layout_weight="2"
+                android:orientation="horizontal"
+                android:weightSum="1">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+                <!-- Min Temperature -->
+                <TextView
+                    android:id="@+id/tv_min_temperature"
+                    style="@style/textview_regular"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"
+                    android:gravity="center"
+                    android:text="@{String.valueOf(forecast.minTemperature)}"
+                    tools:text="9" />
+
+                <!-- Temperature Range Indicator -->
+                <SeekBar
+                    android:id="@+id/seekbar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0.6"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:progressDrawable="@drawable/seekbar_progress_style"
+                    android:splitTrack="false"
+                    android:thumb="@null" />
+
+                <!-- Max Temperature -->
+                <TextView
+                    android:id="@+id/tv_max_temperature"
+                    style="@style/textview_regular"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"
+                    android:gravity="center"
+                    android:text="@{String.valueOf(forecast.maxTemperature)}"
+                    tools:text="18" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.7dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/white" />
+
+    </LinearLayout>
 </layout>

@@ -9,6 +9,7 @@ import com.weatherappdemo.data.model.toWeatherData
 import com.weatherappdemo.data.model.toWeeklyForecastDataModelList
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.data.remote.api.APIServices
+import com.weatherappdemo.utils.LogUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -54,12 +55,14 @@ class WeatherRepository(private val apiServices: APIServices) {
             }
         }
 
-    suspend fun getWeeklyForecast(lat: Double, lon: Double): APIResponse<List<ForecastData>> {
+    suspend fun getFiveDaysForecast(lat: Double, lon: Double): APIResponse<List<ForecastData>> {
+        LogUtils.log("getFiveDaysForecast from repo $lat, $lon")
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiServices.getWeatherForecast(lat, lon)
                 if (response.isSuccessful) {
                     response.body()?.let {
+                        LogUtils.log("getFiveDaysForecast success")
                         APIResponse.Success(it.toWeeklyForecastDataModelList())
                     } ?: APIResponse.Error(application.getString(R.string.no_data_available))
                 } else {

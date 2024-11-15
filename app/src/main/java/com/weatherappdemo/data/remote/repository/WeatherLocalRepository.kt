@@ -1,11 +1,12 @@
 package com.weatherappdemo.data.remote.repository
 
-import com.example.yourapp.utils.toWeatherDataList
-import com.example.yourapp.utils.toWeatherEntity
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
+import com.weatherappdemo.data.local.utils.toWeatherDataList
+import com.weatherappdemo.data.local.utils.toWeatherEntity
 import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.utils.LogUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -30,6 +31,7 @@ class WeatherLocalRepository private constructor() {
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val entity = weatherData.toWeatherEntity()
+                LogUtils.log("lat = ${entity.latitude}, long = ${entity.longitude}")
                 entity.isFavCity = true
                 weatherDao.addFavouriteCity(entity)
                 DBResponse.Success(
@@ -48,12 +50,8 @@ class WeatherLocalRepository private constructor() {
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val tempList = weatherDao.getFavoriteCities()
+                LogUtils.log("getAllFavouriteCities list size  =  ${tempList.size}")
                 DBResponse.Success(tempList.toWeatherDataList())
-                /*if (tempList.isNotEmpty()) {
-                    DBResponse.Success(tempList.toWeatherDataList())
-                } else {
-                    DBResponse.Error(application.getString(R.string.no_favourite_cities_found))
-                }*/
             } catch (e: Exception) {
                 DBResponse.Error(
                     application.getString(
@@ -89,6 +87,9 @@ class WeatherLocalRepository private constructor() {
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val entity = weatherData.toWeatherEntity()
+                entity.longitude = weatherData.longitude
+                entity.latitude = weatherData.latitude
+                LogUtils.log("entity $entity")
                 weatherDao.addWeatherData(entity)
                 DBResponse.Success("added successfully")
             } catch (e: Exception) {

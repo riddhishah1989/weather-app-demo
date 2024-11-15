@@ -4,10 +4,10 @@ import com.weatherappdemo.data.remote.webResponse.WeatherResponse
 
 data class WeatherData(
     val cityName: String,
-    val temperature: Double,
+    var temperature: Double,
     val feelsLike: Double,
-    val tempMin: Double,
-    val tempMax: Double,
+    var tempMin: Double,
+    var tempMax: Double,
     val pressure: Int,
     val humidity: Int,
     val windSpeed: Double,
@@ -19,7 +19,9 @@ data class WeatherData(
     val sunset: Long,
     val weatherMain: String,
     val description: String,
-    val icon: String
+    val icon: String,
+    var latitude: Double,
+    var longitude: Double
 )
 
 
@@ -41,7 +43,9 @@ fun WeatherResponse.toWeatherData() = WeatherData(
     sunset = this.sys.sunset,
     weatherMain = this.weather.firstOrNull()?.main ?: "N/A",
     description = this.weather.firstOrNull()?.description ?: "N/A",
-    icon = this.weather.firstOrNull()?.icon ?: "N/A"
+    icon = this.weather.firstOrNull()?.icon ?: "N/A",
+    longitude = this.coord.lat,
+    latitude = this.coord.lon
 )
 
 

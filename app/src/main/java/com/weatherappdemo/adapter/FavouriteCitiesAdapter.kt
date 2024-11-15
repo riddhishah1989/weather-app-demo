@@ -7,7 +7,8 @@ import com.weatherappdemo.R
 import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.databinding.ItemFavouriteCityBinding
 
-class FavoriteCitiesAdapter : RecyclerView.Adapter<FavoriteCitiesAdapter.FavoriteCityViewHolder>() {
+class FavouriteCitiesAdapter :
+    RecyclerView.Adapter<FavouriteCitiesAdapter.FavoriteCityViewHolder>() {
 
     private var cities: List<WeatherData>? = null
 
@@ -27,11 +28,11 @@ class FavoriteCitiesAdapter : RecyclerView.Adapter<FavoriteCitiesAdapter.Favorit
     class FavoriteCityViewHolder(private val binding: ItemFavouriteCityBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(city: WeatherData) {
-            binding.weatherData = city
+        fun bind(data: WeatherData) {
+            binding.weatherData = data
             val degreeSymbol = itemView.context.getString(R.string.degree_symbol_celcious)
             binding.cityTemperature.text = buildString {
-                append(city.main.temp)
+                append(data.temperature)
                 append(degreeSymbol)
             }
         }

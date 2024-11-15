@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.weatherappdemo.MyApplication
+import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
 import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.data.model.WeatherData
@@ -45,7 +46,7 @@ class WeatherViewModel : BaseViewModel() {
 
     fun getCurrentLocationWeather(lat: Double, long: Double) {
         LogUtils.log(message = "getCurrentLocationWeather called $lat & $long")
-        if (Utils.isInternetConnected(application.applicationContext)) {
+        if (Utils.isInternetConnected(application)) {
             LogUtils.log(message = "Internet connected")
             showLoading()
             viewModelScope.launch {
@@ -54,7 +55,10 @@ class WeatherViewModel : BaseViewModel() {
                 hideLoading()
             }
         } else {
-            Utils.showToast(application.applicationContext, "No Internet Connection Found.")
+            Utils.showToast(
+                application,
+                application.getString(R.string.no_internet_connection_found)
+            )
         }
 
     }
@@ -108,9 +112,10 @@ class WeatherViewModel : BaseViewModel() {
         }
     }
 
-    fun fetchWeeklyForecast(lat: Double, lon: Double) {
+    fun fetchFiveDaysForecast(lat: Double, lon: Double) {
+        LogUtils.log("fetchFiveDaysForecast viewmodel ")
         viewModelScope.launch {
-            val result = apiRepository.getWeeklyForecast(lat, lon)
+            val result = apiRepository.getFiveDaysForecast(lat, lon)
             _weeklyForecast.postValue(result)
         }
     }

@@ -20,6 +20,14 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+
+    <style name="textview_medium_bold">
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+
     <style name="textview_large_bold">
         <item name="android:fontFamily">@font/roboto_bold</item>
         <item name="android:textSize">25sp</item>

@@ -12,7 +12,7 @@ interface APIServices {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String = ApiConstants.WEATHER_API_KEY,
-        //@Query("units") units: String = "metric"
+        @Query("units") units: String = "metric"
     ): Response<WeatherResponse>
 
     @GET("forecast?")
@@ -20,6 +20,14 @@ interface APIServices {
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String = ApiConstants.WEATHER_API_KEY,
+        @Query("units") units: String = "metric"
     ): Response<ForecastResponse>
+
+    @GET("weather?q=")
+    suspend fun getWeatherForecastByCity(
+        @Query("q") q: String,
+        @Query("appid") apiKey: String = ApiConstants.WEATHER_API_KEY,
+        @Query("units") units: String = "metric"
+    )
 
 }
