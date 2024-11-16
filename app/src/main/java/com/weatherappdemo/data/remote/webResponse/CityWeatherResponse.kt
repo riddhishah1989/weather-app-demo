@@ -36,9 +36,3 @@ data class CityWeatherResponse(
     data class Clouds(val all: Int)
     data class Sys(val country: String, val sunrise: Long, val sunset: Long)
 }
-
-
-
-
-
-

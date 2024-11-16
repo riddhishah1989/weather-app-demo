@@ -10,24 +10,25 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
-import com.weatherappdemo.adapter.FavouriteCitiesAdapter
+import com.weatherappdemo.adapter.SearchCitiesAdapter
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
 import com.weatherappdemo.data.local.DBResponse
 import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentHomeBinding
 import com.weatherappdemo.ui.customView.CustomProgressDialog
+import com.weatherappdemo.utils.CustomInterfaces
 import com.weatherappdemo.utils.LocationHelper
 import com.weatherappdemo.utils.LogUtils
 import com.weatherappdemo.utils.Utils
 import com.weatherappdemo.viewmodel.WeatherViewModel
 import kotlin.math.roundToInt
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var locationHelper: LocationHelper
     private lateinit var viewModel: WeatherViewModel
-    private lateinit var adapter: FavouriteCitiesAdapter
+    private lateinit var adapter: SearchCitiesAdapter
     private lateinit var forecastAdapter: WeeklyForecastAdapter
     private lateinit var progressDialog: CustomProgressDialog
     private lateinit var currentLocationWeather: WeatherData
@@ -44,17 +45,8 @@ class HomeFragment : Fragment() {
 
     private fun init() {
         getLocationData()
-        setupFavCitiesRecyclerView()
+        setupSearchedCitiesRecyclerView()
         setupForecastRecyclerView()
-
-        binding.favCardView.setOnClickListener {
-            if (binding.weatherData != null) {
-                progressDialog.show()
-                viewModel.addFavCity(currentLocationWeather)
-            } else {
-                Utils.showToast(requireActivity(), "Unable to add your location to favourites.")
-            }
-        }
     }
 
     override fun onResume() {
@@ -110,7 +102,7 @@ class HomeFragment : Fragment() {
         }
 
         // Observe favorite cities
-        viewModel.favCitiesList.observe(viewLifecycleOwner) { dbResponse ->
+        viewModel.getSearchedCitiesList.observe(viewLifecycleOwner) { dbResponse ->
             when (dbResponse) {
                 is DBResponse.Success -> {
                     if (dbResponse.data.isNotEmpty()) {
@@ -132,7 +124,7 @@ class HomeFragment : Fragment() {
         }
 
         //forcast for next 5 days
-        viewModel.weeklyForecast.observe(viewLifecycleOwner) { apiResponse ->
+        viewModel.fiveDaysForecast.observe(viewLifecycleOwner) { apiResponse ->
             progressDialog.dismiss()
             when (apiResponse) {
                 is APIResponse.Success -> {
@@ -148,15 +140,15 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setupFavCitiesRecyclerView() {
-        adapter = FavouriteCitiesAdapter()
-        binding.rvFavCities.layoutManager = LinearLayoutManager(requireContext()).apply {
+    private fun setupSearchedCitiesRecyclerView() {
+        adapter = SearchCitiesAdapter(this)
+        binding.rvSearchCities.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.HORIZONTAL
             isSmoothScrollbarEnabled = true
         }
-        binding.rvFavCities.adapter = adapter
+        binding.rvSearchCities.adapter = adapter
 
-        viewModel.getFavCitiesData() // Fetch favourite cities
+        viewModel.getAllSearchedCitiesList() // Fetch favourite cities
 
 
     }
@@ -193,6 +185,10 @@ class HomeFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         locationHelper.stopLocationUpdates()
+    }
+
+    override fun onItemClick(data: WeatherData) {
+        Utils.showToast(requireActivity(), "Navigation to details")
     }
 }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
+import com.weatherappdemo.data.model.CityWeatherModel
 import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.data.model.WeatherData
 import com.weatherappdemo.data.remote.api.APIResponse
@@ -20,28 +21,26 @@ class WeatherViewModel : BaseViewModel() {
     private val localRepository = WeatherLocalRepository.getInstance()
     private val application = MyApplication.instance
 
-    private val _favCitiesList = MutableLiveData<DBResponse<List<WeatherData>>>()
-    val favCitiesList: LiveData<DBResponse<List<WeatherData>>> = _favCitiesList
-
-    private val _addFavCity = MutableLiveData<DBResponse<String>>()
-    val addFavCity: LiveData<DBResponse<String>> = _addFavCity
-
+    //DB
     private val _addSearchedCity = MutableLiveData<DBResponse<String>>()
     val addSearchedCity: LiveData<DBResponse<String>> = _addSearchedCity
 
-    private val _offlineDataList = MutableLiveData<DBResponse<List<WeatherData>>>()
-    val offlineDataList: LiveData<DBResponse<List<WeatherData>>> = _offlineDataList
+    private val _getSearchedCitiesList = MutableLiveData<DBResponse<List<WeatherData>>>()
+    val getSearchedCitiesList: LiveData<DBResponse<List<WeatherData>>> = _getSearchedCitiesList
 
+    //API
     private val _getCurrentWeather = MutableLiveData<APIResponse<WeatherData>>()
     val getCurrentWeather: LiveData<APIResponse<WeatherData>> = _getCurrentWeather
-
 
     private val _getForecastWeather = MutableLiveData<APIResponse<List<ForecastData>>>()
     val getForecastWeather: LiveData<APIResponse<List<ForecastData>>> = _getForecastWeather
 
 
-    private val _weeklyForecast = MutableLiveData<APIResponse<List<ForecastData>>>()
-    val weeklyForecast: LiveData<APIResponse<List<ForecastData>>> = _weeklyForecast
+    private val _fiveDaysForecast = MutableLiveData<APIResponse<List<ForecastData>>>()
+    val fiveDaysForecast: LiveData<APIResponse<List<ForecastData>>> = _fiveDaysForecast
+
+    private val _getWeatherByCity = MutableLiveData<APIResponse<CityWeatherModel>>()
+    val getWeatherByCity: LiveData<APIResponse<CityWeatherModel>> = _getWeatherByCity
 
 
     fun getCurrentLocationWeather(lat: Double, long: Double) {
@@ -63,10 +62,27 @@ class WeatherViewModel : BaseViewModel() {
 
     }
 
-    fun getForecastWeather(lat: Double, long: Double) {
+    fun getWeatherDataByCity(cityName: String) {
         showLoading()
         viewModelScope.launch {
-            val result = apiRepository.getWeatherForecast(lat, long)
+            val result = apiRepository.getWeatherByCityName(cityName)
+            _getWeatherByCity.postValue(result)
+            hideLoading()
+        }
+    }
+
+    fun fetchFiveDaysForecast(lat: Double, lon: Double) {
+        LogUtils.log("fetchFiveDaysForecast viewmodel ")
+        viewModelScope.launch {
+            val result = apiRepository.getFiveDaysForecast(lat, lon)
+            _fiveDaysForecast.postValue(result)
+        }
+    }
+
+    fun getAllForecastWeather(lat: Double, long: Double) {
+        showLoading()
+        viewModelScope.launch {
+            val result = apiRepository.getAllWeatherForecast(lat, long)
             _getForecastWeather.postValue(result)
             hideLoading()
         }
@@ -75,24 +91,6 @@ class WeatherViewModel : BaseViewModel() {
 
 
     //DB Methods
-
-    fun getFavCitiesData() {
-        showLoading()
-        viewModelScope.launch {
-            val result = localRepository.getAllFavouriteCities()
-            _favCitiesList.postValue(result)
-            hideLoading()
-        }
-    }
-
-    fun addFavCity(weatherData: WeatherData) {
-        showLoading()
-        viewModelScope.launch {
-            val result = localRepository.addFavourite(weatherData)
-            _addFavCity.postValue(result)
-            hideLoading()
-        }
-    }
 
     fun addSearchedCity(weatherData: WeatherData) {
         showLoading()
@@ -103,20 +101,12 @@ class WeatherViewModel : BaseViewModel() {
         }
     }
 
-    fun getAllLastSyncWeatherData() {
+    fun getAllSearchedCitiesList() {
         showLoading()
         viewModelScope.launch {
             val result = localRepository.getOfflineWeatherData()
-            _offlineDataList.postValue(result)
+            _getSearchedCitiesList.postValue(result)
             hideLoading()
-        }
-    }
-
-    fun fetchFiveDaysForecast(lat: Double, lon: Double) {
-        LogUtils.log("fetchFiveDaysForecast viewmodel ")
-        viewModelScope.launch {
-            val result = apiRepository.getFiveDaysForecast(lat, lon)
-            _weeklyForecast.postValue(result)
         }
     }
 }

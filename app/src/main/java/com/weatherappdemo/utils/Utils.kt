@@ -68,4 +68,10 @@ object Utils {
             else -> dayOfWeek
         }
     }
+
+    fun convertUnixToAmPm(unixTime: Long): String {
+        val date = Date(unixTime * 1000) // Convert seconds to milliseconds
+        val sdf = SimpleDateFormat("h:mm a", Locale.getDefault()) // Format for AM/PM
+        return sdf.format(date)
+    }
 }

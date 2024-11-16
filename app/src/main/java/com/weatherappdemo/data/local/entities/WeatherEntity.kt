@@ -21,7 +21,6 @@ data class WeatherEntity(
     val sunriseTime: Long,
     val sunsetTime: Long,
     val lastUpdated: Long, // timestamp for last update
-    var isFavCity: Boolean = false
 )
 
 

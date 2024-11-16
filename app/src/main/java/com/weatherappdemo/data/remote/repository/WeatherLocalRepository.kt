@@ -27,30 +27,11 @@ class WeatherLocalRepository private constructor() {
     }
 
 
-    suspend fun addFavourite(weatherData: WeatherData): DBResponse<String> =
+    suspend fun getAllSearchedCities(): DBResponse<List<WeatherData>> =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val entity = weatherData.toWeatherEntity()
-                LogUtils.log("lat = ${entity.latitude}, long = ${entity.longitude}")
-                entity.isFavCity = true
-                weatherDao.addFavouriteCity(entity)
-                DBResponse.Success(
-                    application.getString(
-                        R.string.added_to_favourite_successfully,
-                        weatherData.cityName
-                    )
-                )
-            } catch (e: Exception) {
-                DBResponse.Error(application.getString(R.string.error_adding_favourite, e.message))
-            }
-        }
-
-
-    suspend fun getAllFavouriteCities(): DBResponse<List<WeatherData>> =
-        withContext(Dispatchers.IO) {
-            return@withContext try {
-                val tempList = weatherDao.getFavoriteCities()
-                LogUtils.log("getAllFavouriteCities list size  =  ${tempList.size}")
+                val tempList = weatherDao.getAllWeatherData()
+                LogUtils.log("getAllSearchedCities list size  =  ${tempList.size}")
                 DBResponse.Success(tempList.toWeatherDataList())
             } catch (e: Exception) {
                 DBResponse.Error(
