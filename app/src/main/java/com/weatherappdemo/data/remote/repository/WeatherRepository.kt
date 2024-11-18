@@ -2,15 +2,13 @@ package com.weatherappdemo.data.remote.repository
 
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
-import com.weatherappdemo.data.model.CityWeatherModel
 import com.weatherappdemo.data.model.ForecastData
-import com.weatherappdemo.data.model.WeatherData
-import com.weatherappdemo.data.model.toCityWeatherData
+import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.model.toForecastDataModelList
-import com.weatherappdemo.data.model.toWeatherData
-import com.weatherappdemo.data.model.toWeeklyForecastDataModelList
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.data.remote.api.APIServices
+import com.weatherappdemo.data.utils.toWeatherData
+import com.weatherappdemo.data.utils.toWeeklyForecastDataModelList
 import com.weatherappdemo.utils.LogUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +17,7 @@ class WeatherRepository(private val apiServices: APIServices) {
 
     private val application = MyApplication.instance
 
-    suspend fun getCurrentWeather(lat: Double, lon: Double): APIResponse<WeatherData> =
+    suspend fun getCurrentWeather(lat: Double, lon: Double): APIResponse<WeatherDataModel> =
         withContext(Dispatchers.IO) {
             try {
                 val response = apiServices.getCurrentLocationWeather(lat, lon)
@@ -88,13 +86,13 @@ class WeatherRepository(private val apiServices: APIServices) {
      * Returns weather info by city details
      */
 
-    suspend fun getWeatherByCityName(cityName: String): APIResponse<CityWeatherModel> {
+    suspend fun getWeatherByCityName(cityName: String): APIResponse<WeatherDataModel> {
         return withContext(Dispatchers.IO) {
             try {
                 val response = apiServices.getWeatherForecastByCity(cityName)
                 if (response.isSuccessful) {
                     response.body()?.let {
-                        APIResponse.Success(it.toCityWeatherData())
+                        APIResponse.Success(it.toWeatherData())
                     } ?: APIResponse.Error(application.getString(R.string.no_data_available))
                 } else {
                     APIResponse.Error(application.getString(R.string.failed_to_fetch_weather))

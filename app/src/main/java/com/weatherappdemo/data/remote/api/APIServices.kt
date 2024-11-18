@@ -1,6 +1,5 @@
 package com.weatherappdemo.data.remote.api
 
-import com.weatherappdemo.data.remote.webResponse.CityWeatherResponse
 import com.weatherappdemo.data.remote.webResponse.ForecastResponse
 import com.weatherappdemo.data.remote.webResponse.WeatherResponse
 import retrofit2.Response
@@ -24,11 +23,11 @@ interface APIServices {
         @Query("units") units: String = "metric"
     ): Response<ForecastResponse>
 
-    @GET("weather?q=")
+    @GET("weather?")
     suspend fun getWeatherForecastByCity(
         @Query("q") q: String,
         @Query("appid") apiKey: String = ApiConstants.WEATHER_API_KEY,
         @Query("units") units: String = "metric"
-    ):Response<CityWeatherResponse>
+    ): Response<WeatherResponse>
 
 }

@@ -1,9 +1,9 @@
 package com.weatherappdemo.utils
 
-import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.data.model.WeatherDataModel
 
 object CustomInterfaces {
     interface OnSearchedCityItemClick {
-        fun onItemClick(data: WeatherData)
+        fun onItemClick(data: WeatherDataModel)
     }
 }

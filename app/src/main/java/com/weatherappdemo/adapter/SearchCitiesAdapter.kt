@@ -4,14 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.weatherappdemo.R
-import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.databinding.ItemSearchedCityBinding
 import com.weatherappdemo.utils.CustomInterfaces
 
 class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCityItemClick) :
     RecyclerView.Adapter<SearchCitiesAdapter.SearchCityViewHolder>() {
 
-    private var searchCitiesData: List<WeatherData>? = null
+    private var searchCitiesData: List<WeatherDataModel>? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchCityViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -32,7 +32,7 @@ class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCi
     ) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(data: WeatherData) {
+        fun bind(data: WeatherDataModel) {
             binding.weatherData = data
             val degreeSymbol = itemView.context.getString(R.string.degree_symbol_celcious)
             binding.cityTemperature.text = buildString {
@@ -46,7 +46,7 @@ class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCi
         }
     }
 
-    fun addData(cities: List<WeatherData>) {
+    fun addData(cities: List<WeatherDataModel>) {
         this.searchCitiesData = cities
         notifyDataSetChanged()
     }

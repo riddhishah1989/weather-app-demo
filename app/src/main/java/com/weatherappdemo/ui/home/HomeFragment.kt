@@ -1,5 +1,6 @@
 package com.weatherappdemo.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,10 +14,11 @@ import com.weatherappdemo.R
 import com.weatherappdemo.adapter.SearchCitiesAdapter
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
 import com.weatherappdemo.data.local.DBResponse
-import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentHomeBinding
 import com.weatherappdemo.ui.customView.CustomProgressDialog
+import com.weatherappdemo.ui.forecast.ForecastDetailsActivity
 import com.weatherappdemo.utils.CustomInterfaces
 import com.weatherappdemo.utils.LocationHelper
 import com.weatherappdemo.utils.LogUtils
@@ -31,7 +33,7 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
     private lateinit var adapter: SearchCitiesAdapter
     private lateinit var forecastAdapter: WeeklyForecastAdapter
     private lateinit var progressDialog: CustomProgressDialog
-    private lateinit var currentLocationWeather: WeatherData
+    private lateinit var currentLocationWeather: WeatherDataModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -101,23 +103,30 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
             }
         }
 
-        // Observe favorite cities
+        // Observe searched cities
         viewModel.getSearchedCitiesList.observe(viewLifecycleOwner) { dbResponse ->
             when (dbResponse) {
                 is DBResponse.Success -> {
+                    LogUtils.log("Success")
                     if (dbResponse.data.isNotEmpty()) {
                         binding.tvNoDataFound.visibility = View.GONE
                         adapter.addData(dbResponse.data)
                     } else {
+                        LogUtils.log("No data found")
                         binding.tvNoDataFound.visibility = View.VISIBLE
                     }
                 }
 
                 is DBResponse.Error -> {
-                    Utils.showToast(requireActivity(), dbResponse.message)
+                    binding.tvNoDataFound.visibility = View.VISIBLE
+                    Utils.showToast(
+                        requireActivity(),
+                        "getSearchedCitiesList Error: " + dbResponse.message
+                    )
                 }
 
                 else -> {
+                    binding.tvNoDataFound.visibility = View.VISIBLE
                     LogUtils.log(message = "favCitiesList else called")
                 }
             }
@@ -187,8 +196,11 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         locationHelper.stopLocationUpdates()
     }
 
-    override fun onItemClick(data: WeatherData) {
+    override fun onItemClick(data: WeatherDataModel) {
         Utils.showToast(requireActivity(), "Navigation to details")
+        val intent = Intent(requireActivity(), ForecastDetailsActivity::class.java)
+        intent.putExtra("weatherData", data)
+        startActivity(intent)
     }
 }
 

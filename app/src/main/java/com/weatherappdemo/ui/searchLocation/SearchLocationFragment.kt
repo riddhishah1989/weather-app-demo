@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
-import com.weatherappdemo.data.model.toWeatherEntity
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentSearchLocationBinding
 import com.weatherappdemo.ui.customView.CustomProgressDialog
@@ -33,6 +32,7 @@ class SearchLocationFragment : Fragment() {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_search_location, container, false)
         viewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        progressDialog = CustomProgressDialog(requireActivity())
         return binding.root
     }
 
@@ -49,6 +49,7 @@ class SearchLocationFragment : Fragment() {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = textView.text.toString()
                 if (query.isNotEmpty()) {
+                    Utils.hideKeyboard(requireActivity())
                     progressDialog.show()
                     viewModel.getWeatherDataByCity(query)
                 }
@@ -72,8 +73,6 @@ class SearchLocationFragment : Fragment() {
 
 
     private fun setUpObservers() {
-        progressDialog.show()
-
         // Observe current weather data
         viewModel.getWeatherByCity.observe(viewLifecycleOwner) { apiResponse ->
             progressDialog.dismiss()
@@ -95,7 +94,7 @@ class SearchLocationFragment : Fragment() {
                         currentLocationWeather.longitude
                     )
                     //added searched city
-                    //viewModel.addSearchedCity(currentLocationWeather)
+                    viewModel.addSearchedCity(currentLocationWeather)
 
                     currentLocationWeather.apply {
                         temperature = temperature.roundToInt().toDouble()
@@ -104,13 +103,20 @@ class SearchLocationFragment : Fragment() {
                         tempMax = tempMax.roundToInt().toDouble()
                     }
                     binding.weatherData = currentLocationWeather
-                    binding.tvTemprature.text =
+                    binding.weatherDetailsLayout.tvTemprature.text =
                         buildString {
-                            append(currentLocationWeather.temperature)
+                            append(
+                                Utils.formatTemperature(
+                                    requireActivity(),
+                                    currentLocationWeather.temperature
+                                )
+                            )
                             append(R.string.degree_symbol_celcious)
                         }
-                    binding.tvSunrise.text = Utils.convertUnixToAmPm(currentLocationWeather.sunrise)
-                    binding.tvSunset.text = Utils.convertUnixToAmPm(currentLocationWeather.sunset)
+                    binding.weatherDetailsLayout.tvSunrise.text =
+                        Utils.convertUnixToAmPm(currentLocationWeather.sunrise)
+                    binding.weatherDetailsLayout.tvSunset.text =
+                        Utils.convertUnixToAmPm(currentLocationWeather.sunset)
                 }
 
                 is APIResponse.Error -> {
@@ -122,14 +128,22 @@ class SearchLocationFragment : Fragment() {
         //forcast for next 5 days
         viewModel.fiveDaysForecast.observe(viewLifecycleOwner) { apiResponse ->
             progressDialog.dismiss()
+            binding.rlForecast.visibility = View.VISIBLE
             when (apiResponse) {
                 is APIResponse.Success -> {
                     // Update RecyclerView with the weekly forecast
                     LogUtils.log("Size ${apiResponse.data.size}")
-                    forecastAdapter.addData(apiResponse.data)
+                    if (apiResponse.data.isNotEmpty()) {
+                        binding.tvNoDataFoundForecast.visibility = View.GONE
+
+                        forecastAdapter.addData(apiResponse.data)
+                    } else {
+                        binding.tvNoDataFoundForecast.visibility = View.VISIBLE
+                    }
                 }
 
                 is APIResponse.Error -> {
+                    binding.tvNoDataFoundForecast.visibility = View.VISIBLE
                     Utils.showToast(requireActivity(), apiResponse.message)
                 }
             }

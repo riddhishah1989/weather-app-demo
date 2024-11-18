@@ -3,9 +3,9 @@ package com.weatherappdemo.data.remote.repository
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
-import com.weatherappdemo.data.local.utils.toWeatherDataList
-import com.weatherappdemo.data.local.utils.toWeatherEntity
-import com.weatherappdemo.data.model.WeatherData
+import com.weatherappdemo.data.model.WeatherDataModel
+import com.weatherappdemo.data.utils.toWeatherDataList
+import com.weatherappdemo.data.utils.toWeatherEntity
 import com.weatherappdemo.utils.LogUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,7 +27,7 @@ class WeatherLocalRepository private constructor() {
     }
 
 
-    suspend fun getAllSearchedCities(): DBResponse<List<WeatherData>> =
+    suspend fun getAllSearchedCities(): DBResponse<List<WeatherDataModel>> =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val tempList = weatherDao.getAllWeatherData()
@@ -44,15 +44,11 @@ class WeatherLocalRepository private constructor() {
             }
         }
 
-    suspend fun getOfflineWeatherData(): DBResponse<List<WeatherData>> =
+    suspend fun getAllSearchedCitiesList(): DBResponse<List<WeatherDataModel>> =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val tempList = weatherDao.getAllWeatherData()
-                if (tempList.isNotEmpty()) {
-                    DBResponse.Success(tempList.toWeatherDataList())
-                } else {
-                    DBResponse.Error(application.getString(R.string.no_data_available))
-                }
+                DBResponse.Success(tempList.toWeatherDataList())
             } catch (e: Exception) {
 
                 DBResponse.Error(
@@ -64,20 +60,23 @@ class WeatherLocalRepository private constructor() {
             }
         }
 
-    suspend fun addSearchedCity(weatherData: WeatherData): DBResponse<String> =
+    suspend fun addSearchedCity(weatherData: WeatherDataModel): DBResponse<String> =
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val entity = weatherData.toWeatherEntity()
-                entity.longitude = weatherData.longitude
-                entity.latitude = weatherData.latitude
-                LogUtils.log("entity $entity")
-                weatherDao.addWeatherData(entity)
-                DBResponse.Success("added successfully")
+                val existingEntry =
+                    weatherDao.getWeatherByLocation(weatherData.latitude, weatherData.longitude)
+
+                if (existingEntry != null) {
+                    entity.id = existingEntry.id // Keep the same ID for the update
+                    weatherDao.updateWeatherData(entity)
+                } else {
+                    weatherDao.addWeatherData(entity)
+                }
+
+                DBResponse.Success("Weather data added/updated successfully")
             } catch (e: Exception) {
                 DBResponse.Error(application.getString(R.string.error_while_adding_data, e.message))
             }
-
         }
-
-
 }
