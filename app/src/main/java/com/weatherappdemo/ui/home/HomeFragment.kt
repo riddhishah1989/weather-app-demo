@@ -84,17 +84,16 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
                 is APIResponse.Success -> {
                     currentLocationWeather = apiResponse.data
                     LogUtils.log(message = "Data = $currentLocationWeather")
-
+                    LogUtils.log("data = ${currentLocationWeather.feelsLike}, ${currentLocationWeather.tempMax}, ${currentLocationWeather.tempMin}")
+                    //data = 17.86, 19.43, 16.38
                     currentLocationWeather.apply {
                         temperature = temperature.roundToInt().toDouble()
+                        feelsLike = feelsLike.roundToInt().toDouble()
+                        tempMax = tempMax.roundToInt().toDouble()
+                        tempMin = tempMin.roundToInt().toDouble()
                     }
 
                     binding.weatherData = currentLocationWeather
-                    val imageUrl = Utils.getWeatherIconUrl(currentLocationWeather.icon)
-                    LogUtils.log("URL = $imageUrl")
-                    binding.weatherIconUrl = imageUrl
-
-                    binding.textDay.text = Utils.showDayFromCurrentDate()
                 }
 
                 is APIResponse.Error -> {
@@ -105,6 +104,7 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
 
         // Observe searched cities
         viewModel.getSearchedCitiesList.observe(viewLifecycleOwner) { dbResponse ->
+
             when (dbResponse) {
                 is DBResponse.Success -> {
                     LogUtils.log("Success")

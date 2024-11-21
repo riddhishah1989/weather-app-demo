@@ -3,17 +3,15 @@ package com.weatherappdemo.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.weatherappdemo.R
 import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.databinding.ItemForecastWeeklyBinding
 import com.weatherappdemo.utils.LogUtils
-import com.weatherappdemo.utils.Utils
 import kotlin.math.roundToInt
 
 class WeeklyForecastAdapter :
     RecyclerView.Adapter<WeeklyForecastAdapter.ForecastViewHolder>() {
 
-    private var weeklyForecastList: List<ForecastData>? = null
+    private lateinit var weeklyForecastList: List<ForecastData>
     private var minTemp = 0.0
     private var maxTemp = 30.0
 
@@ -28,20 +26,26 @@ class WeeklyForecastAdapter :
         city?.let { holder.bind(it, minTemp, maxTemp) }
     }
 
-    override fun getItemCount(): Int = weeklyForecastList?.size ?: 0
+    override fun getItemCount(): Int =
+        if (::weeklyForecastList.isInitialized) weeklyForecastList.size else 0
 
     class ForecastViewHolder(private val binding: ItemForecastWeeklyBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(forecastData: ForecastData, minTemp: Double, maxTemp: Double) {
             binding.forecast = forecastData
-            binding.degreeSymbol = itemView.context.getString(R.string.degree_symbol_celcious)
-            binding.iconURL = Utils.getWeatherIconUrl(forecastData.icon)
+            // Temperature range calculation
+            val tempRange = (maxTemp - minTemp).coerceAtLeast(1.0) // Ensure valid range
+            val adjustedProgress = ((forecastData.temperature - minTemp) / tempRange * 100).toInt()
+
+            LogUtils.log("Bind - Temperature ${forecastData.temperature}, Min $minTemp, Max $maxTemp, Range $tempRange, Progress $adjustedProgress")
+
             binding.seekbar.apply {
-                max = (maxTemp - minTemp).roundToInt()
-                progress = (forecastData.temperature - minTemp).roundToInt()
+                max = 100 // Fixed scale
+                progress = adjustedProgress
             }
         }
+
 
     }
 
@@ -52,10 +56,14 @@ class WeeklyForecastAdapter :
                 maxTemperature = maxTemperature.roundToInt().toDouble()
             }
         }
-        minTemp = this.weeklyForecastList?.minOf { it.minTemperature } ?: 0.0
-        maxTemp = this.weeklyForecastList?.maxOf { it.maxTemperature } ?: 0.0
-        LogUtils.log("minTemp=$minTemp, maxTemp=$maxTemp")
+        // get min and max temperature from list
+        minTemp = this.weeklyForecastList.minOfOrNull { it.minTemperature } ?: 0.0
+        maxTemp = this.weeklyForecastList.maxOfOrNull { it.maxTemperature } ?: 0.0
+
+
+        LogUtils.log("AddData - minTemp=$minTemp, maxTemp=$maxTemp")
         notifyDataSetChanged()
     }
+
 
 }

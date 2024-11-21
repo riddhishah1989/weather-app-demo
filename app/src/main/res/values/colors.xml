@@ -14,6 +14,7 @@
     <color name="textColorSecondary">#F3E8FF</color>
     <color name="lightShade">#E1DFFF</color>
     <color name="cardBackgroundColor">#59447C</color>
-    <color name="secondaryBackgroundColor_transperent">#BF7258A0</color>
+    <color name="secondaryBackgroundColor_transparent">#BF7258A0</color>
+    <color name="transparent">@android:color/transparent</color>
 
 </resources>

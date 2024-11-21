@@ -74,4 +74,13 @@ object Utils {
         val sdf = SimpleDateFormat("h:mm a", Locale.getDefault()) // Format for AM/PM
         return sdf.format(date)
     }
+    fun Utils.getDayDifferenceFromToday(date: String): Int {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val parsedDate = sdf.parse(date)
+        val today = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0) }
+        val inputDate = Calendar.getInstance().apply { time = parsedDate }
+
+        return inputDate.get(Calendar.DAY_OF_YEAR) - today.get(Calendar.DAY_OF_YEAR)
+    }
+
 }

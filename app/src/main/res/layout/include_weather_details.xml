@@ -20,34 +20,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="5dp"
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvTemprature"
-                style="@style/textview_large"
+                android:id="@+id/tvTemperature"
+                style="@style/textview_extra_large_bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
+                android:text="@{weatherData.temperature + @string/degree_symbol}"
                 tools:text="23 C" />
 
             <TextView
-                style="@style/textview_medium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:text="@{weatherData.description}"
-                tools:text="@string/app_name" />
-
-            <TextView
-                style="@style/textview_medium"
+                style="@style/textview_large"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="@{`H:`+ weatherData.tempMax + ` ` + `L:`+ weatherData.tempMin}"
                 tools:text="H:30 L:20" />
+
+            <TextView
+                style="@style/textview_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:text="@{weatherData.description}"
+                tools:text="@string/app_name" />
+
 
         </LinearLayout>
 
@@ -224,7 +228,7 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <!-- Sunset Box -->
+            <!-- Sunset/sunrise Box -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/boxSunset"
                 android:layout_width="0dp"
@@ -236,37 +240,15 @@
                 app:layout_constraintTop_toBottomOf="@id/boxHumidity"
                 app:layout_constraintWidth_percent="0.45">
 
-                <!-- Sunset Label -->
-                <TextView
-                    android:id="@+id/tvSunsetLabel"
-                    style="@style/textview_regular"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Sunset"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Sunset Time -->
-                <TextView
-                    android:id="@+id/tvSunset"
-                    style="@style/textview_large"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvSunsetLabel"
-                    tools:text="6:45 PM" />
-
                 <!-- Sunrise Label -->
                 <TextView
                     android:id="@+id/tvSunriseLabel"
                     style="@style/textview_regular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:text="Sunrise"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvSunset" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- Sunrise Time -->
                 <TextView
@@ -274,10 +256,29 @@
                     style="@style/textview_large"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvSunriseLabel"
                     tools:text="6:45 AM" />
+                <!-- Sunset Label -->
+                <TextView
+                    android:id="@+id/tvSunsetLabel"
+                    style="@style/textview_regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sunset"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvSunrise"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvSunset" />
+
+                <!-- Sunset Time -->
+                <TextView
+                    android:id="@+id/tvSunset"
+                    style="@style/textview_large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvSunsetLabel"
+                    tools:text="6:45 PM" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>

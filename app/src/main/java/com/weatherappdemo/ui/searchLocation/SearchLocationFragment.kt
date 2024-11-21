@@ -103,16 +103,6 @@ class SearchLocationFragment : Fragment() {
                         tempMax = tempMax.roundToInt().toDouble()
                     }
                     binding.weatherData = currentLocationWeather
-                    binding.weatherDetailsLayout.tvTemprature.text =
-                        buildString {
-                            append(
-                                Utils.formatTemperature(
-                                    requireActivity(),
-                                    currentLocationWeather.temperature
-                                )
-                            )
-                            append(R.string.degree_symbol_celcious)
-                        }
                     binding.weatherDetailsLayout.tvSunrise.text =
                         Utils.convertUnixToAmPm(currentLocationWeather.sunrise)
                     binding.weatherDetailsLayout.tvSunset.text =

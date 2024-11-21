@@ -14,8 +14,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        app:cardBackgroundColor="@color/secondaryBackgroundColor"
-        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/colorPrimaryDark"
+        app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
         <LinearLayout
@@ -30,6 +30,7 @@
                 style="@style/textview_medium_bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@{weatherData.temperature + @string/degree_symbol}"
                 tools:text="17" />
 
             <TextView

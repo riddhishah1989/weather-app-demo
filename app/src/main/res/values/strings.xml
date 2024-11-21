@@ -5,6 +5,7 @@
     <string name="menu_search">Search</string>
     <string name="menu_home">Home</string>
     <string name="degree_symbol_celcious">°C</string>
+    <string name="degree_symbol">°</string>
     <string name="unable_to_fetch_location">Unable to fetch location</string>
     <string name="failed_to_get_location">Failed to get location: %1$s</string>
     <string name="location_permission_denied">Location permission denied</string>

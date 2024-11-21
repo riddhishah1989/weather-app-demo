@@ -7,6 +7,7 @@ import com.weatherappdemo.R
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.databinding.ItemSearchedCityBinding
 import com.weatherappdemo.utils.CustomInterfaces
+import kotlin.math.roundToInt
 
 class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCityItemClick) :
     RecyclerView.Adapter<SearchCitiesAdapter.SearchCityViewHolder>() {
@@ -33,12 +34,10 @@ class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCi
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(data: WeatherDataModel) {
-            binding.weatherData = data
-            val degreeSymbol = itemView.context.getString(R.string.degree_symbol_celcious)
-            binding.cityTemperature.text = buildString {
-                append(data.temperature)
-                append(degreeSymbol)
+            data.apply {
+                temperature = temperature.roundToInt().toDouble()
             }
+            binding.weatherData = data
             binding.root.setOnClickListener {
                 onItemClick.onItemClick(data)
 

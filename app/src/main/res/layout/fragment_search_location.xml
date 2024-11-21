@@ -52,12 +52,12 @@
 
 
             <TextView
-                style="@style/textview_extra_large_bold"
+                style="@style/textview_extra_large"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:padding="20dp"
+                android:padding="16dp"
                 android:text="Search for your favorite city's weather details to see the latest updates!"
                 android:visibility="@{weatherData == null ? View.VISIBLE : View.GONE}" />
 
