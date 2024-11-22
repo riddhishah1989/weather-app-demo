@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
+import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.FragmentSearchLocationBinding
 import com.weatherappdemo.ui.customView.CustomProgressDialog
@@ -40,7 +41,9 @@ class SearchLocationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         init()
     }
-
+    /**
+     * Initialise for live data, setup RecyclerViews
+     * */
     private fun init() {
         setupForecastRecyclerView()
         setUpObservers()
@@ -61,7 +64,9 @@ class SearchLocationFragment : Fragment() {
 
     }
 
-
+    /**
+     * Initialise recylerview for 5 days forecast list.
+     *  */
     private fun setupForecastRecyclerView() {
         forecastAdapter = WeeklyForecastAdapter()
         binding.rvForecastData.layoutManager = LinearLayoutManager(requireContext()).apply {
@@ -71,7 +76,9 @@ class SearchLocationFragment : Fragment() {
         binding.rvForecastData.adapter = forecastAdapter
     }
 
-
+    /**
+     * setup observers for live updates and update UI
+     *  */
     private fun setUpObservers() {
         // Observe current weather data
         viewModel.getWeatherByCity.observe(viewLifecycleOwner) { apiResponse ->
@@ -84,29 +91,7 @@ class SearchLocationFragment : Fragment() {
             }
             when (apiResponse) {
                 is APIResponse.Success -> {
-                    val currentLocationWeather = apiResponse.data
-                    LogUtils.log(message = "Data = $currentLocationWeather")
-
-                    //API calling
-
-                    viewModel.fetchFiveDaysForecast(
-                        currentLocationWeather.latitude,
-                        currentLocationWeather.longitude
-                    )
-                    //added searched city
-                    viewModel.addSearchedCity(currentLocationWeather)
-
-                    currentLocationWeather.apply {
-                        temperature = temperature.roundToInt().toDouble()
-                        feelsLike = feelsLike.roundToInt().toDouble()
-                        tempMin = tempMin.roundToInt().toDouble()
-                        tempMax = tempMax.roundToInt().toDouble()
-                    }
-                    binding.weatherData = currentLocationWeather
-                    binding.weatherDetailsLayout.tvSunrise.text =
-                        Utils.convertUnixToAmPm(currentLocationWeather.sunrise)
-                    binding.weatherDetailsLayout.tvSunset.text =
-                        Utils.convertUnixToAmPm(currentLocationWeather.sunset)
+                    setUpSearchCityResponse(apiResponse)
                 }
 
                 is APIResponse.Error -> {
@@ -138,6 +123,42 @@ class SearchLocationFragment : Fragment() {
                 }
             }
         }
+    }
+    /**
+     * setup Search City API response
+     *  */
+    private fun setUpSearchCityResponse(apiResponse: APIResponse.Success<WeatherDataModel>) {
+        val currentLocationWeather = apiResponse.data
+        LogUtils.log(message = "Data = $currentLocationWeather")
+
+        //API calling
+
+        fetchFiveDaysWeatherData(currentLocationWeather)
+
+        //added searched city
+        viewModel.addSearchedCity(currentLocationWeather)
+
+        currentLocationWeather.apply {
+            temperature = temperature.roundToInt().toDouble()
+            feelsLike = feelsLike.roundToInt().toDouble()
+            tempMin = tempMin.roundToInt().toDouble()
+            tempMax = tempMax.roundToInt().toDouble()
+        }
+        binding.weatherData = currentLocationWeather
+        binding.weatherDetailsLayout.tvSunrise.text =
+            Utils.convertUnixToAmPm(currentLocationWeather.sunrise)
+        binding.weatherDetailsLayout.tvSunset.text =
+            Utils.convertUnixToAmPm(currentLocationWeather.sunset)
+    }
+
+    /**
+     * Call API to get searched location's 5 days weather forecast details
+     *  */
+    private fun fetchFiveDaysWeatherData(currentLocationWeather: WeatherDataModel) {
+        viewModel.fetchAndSaveFiveDaysForecast(
+            currentLocationWeather.latitude,
+            currentLocationWeather.longitude
+        )
     }
 
 

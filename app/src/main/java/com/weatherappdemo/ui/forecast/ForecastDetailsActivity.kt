@@ -12,7 +12,6 @@ import com.weatherappdemo.data.local.DBResponse
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.ActivityForecastDetailsBinding
-import com.weatherappdemo.ui.customView.CustomProgressDialog
 import com.weatherappdemo.utils.LogUtils
 import com.weatherappdemo.utils.Utils
 import com.weatherappdemo.viewmodel.WeatherViewModel
@@ -48,7 +47,7 @@ class ForecastDetailsActivity : AppCompatActivity() {
         binding.weatherData = weatherData
         setupForecastRecyclerView()
         setUpObservers()
-        viewModel.fetchFiveDaysForecast(weatherData.latitude, weatherData.longitude)
+        viewModel.fetchAndSaveFiveDaysForecast(weatherData.latitude, weatherData.longitude)
     }
 
     private fun setupForecastRecyclerView() {

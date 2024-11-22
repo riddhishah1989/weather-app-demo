@@ -1,8 +1,9 @@
-package com.weatherappdemo.data.remote.repository
+package com.weatherappdemo.data.repository
 
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
+import com.weatherappdemo.data.local.entities.WeatherEntity
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.utils.toWeatherDataList
 import com.weatherappdemo.data.utils.toWeatherEntity
@@ -26,24 +27,6 @@ class WeatherLocalRepository private constructor() {
         }
     }
 
-
-    suspend fun getAllSearchedCities(): DBResponse<List<WeatherDataModel>> =
-        withContext(Dispatchers.IO) {
-            return@withContext try {
-                val tempList = weatherDao.getAllWeatherData()
-                LogUtils.log("getAllSearchedCities list size  =  ${tempList.size}")
-                DBResponse.Success(tempList.toWeatherDataList())
-            } catch (e: Exception) {
-                DBResponse.Error(
-                    application.getString(
-                        R.string.error_while_fetching_favourite,
-                        e.message
-                    )
-                )
-
-            }
-        }
-
     suspend fun getAllSearchedCitiesList(): DBResponse<List<WeatherDataModel>> =
         withContext(Dispatchers.IO) {
             return@withContext try {
@@ -65,13 +48,13 @@ class WeatherLocalRepository private constructor() {
             return@withContext try {
                 val entity = weatherData.toWeatherEntity()
                 val existingEntry =
-                    weatherDao.getWeatherByLocation(weatherData.latitude, weatherData.longitude)
+                    weatherDao.getSearchedCityWeatherData(weatherData.latitude, weatherData.longitude)
 
                 if (existingEntry != null) {
                     entity.id = existingEntry.id // Keep the same ID for the update
-                    weatherDao.updateWeatherData(entity)
+                    weatherDao.updateSearchCityData(entity)
                 } else {
-                    weatherDao.addWeatherData(entity)
+                    weatherDao.addSearchCityData(entity)
                 }
 
                 DBResponse.Success("Weather data added/updated successfully")
@@ -79,4 +62,15 @@ class WeatherLocalRepository private constructor() {
                 DBResponse.Error(application.getString(R.string.error_while_adding_data, e.message))
             }
         }
+
+    suspend fun getWeatherByLatLng(latitude: Double, longitude: Double): WeatherEntity? {
+        return weatherDao.getCityWeatherByLatLng(latitude, longitude)
+    }
+
+    suspend fun saveWeatherData(weatherEntity: WeatherEntity) {
+        weatherDao.insertOrUpdateWeather(weatherEntity)
+    }
+
+
+
 }

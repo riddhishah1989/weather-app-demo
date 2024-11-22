@@ -1,4 +1,4 @@
-package com.weatherappdemo.data.remote.repository
+package com.weatherappdemo.data.repository
 
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R

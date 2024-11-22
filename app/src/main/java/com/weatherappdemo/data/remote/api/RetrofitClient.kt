@@ -1,7 +1,7 @@
 package com.weatherappdemo.data.remote.api
 
 import com.google.gson.GsonBuilder
-import com.weatherappdemo.data.remote.repository.WeatherRepository
+import com.weatherappdemo.data.repository.WeatherRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

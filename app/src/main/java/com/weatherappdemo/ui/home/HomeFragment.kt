@@ -45,17 +45,29 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         return binding.root
     }
 
+    /**
+     * Init to fetch location data, setup RecyclerViews*/
     private fun init() {
         getLocationData()
         setupSearchedCitiesRecyclerView()
         setupForecastRecyclerView()
     }
 
+    /**
+     * Requesting location permission from user
+     * */
     override fun onResume() {
         super.onResume()
         locationHelper.checkAndRequestLocationPermission()
+
     }
 
+    /**
+     * After receiving location permission, fetching Latitude & Longitude
+     * 1. setup observers for live updates
+     * 2. calling apis to get current location weather
+     * 3. 5 days forecast for current location
+     * */
     private fun getLocationData() {
         locationHelper = LocationHelper(
             requireActivity(),
@@ -67,7 +79,9 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
             getFiveDaysForecastData(latitude, longitude)
         }
     }
-
+    /**
+     * setup observers for live updates and update UI
+     *  */
     private fun setUpObservers() {
         progressDialog.show()
 
@@ -149,6 +163,9 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         }
     }
 
+    /**
+     * Initialise recylerview for searched cities list.
+     *  */
     private fun setupSearchedCitiesRecyclerView() {
         adapter = SearchCitiesAdapter(this)
         binding.rvSearchCities.layoutManager = LinearLayoutManager(requireContext()).apply {
@@ -161,7 +178,9 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
 
 
     }
-
+    /**
+     * Initialise recylerview for 5 days forecast list.
+     *  */
     private fun setupForecastRecyclerView() {
         forecastAdapter = WeeklyForecastAdapter()
         binding.rvUpcomingForcast.layoutManager = LinearLayoutManager(requireContext()).apply {
@@ -170,14 +189,18 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         }
         binding.rvUpcomingForcast.adapter = forecastAdapter
     }
-
+    /**
+     * Call API to get current location weather details
+     *  */
     private fun getWeatherDataByLocation(latitude: Double, longitude: Double) {
-        viewModel.getCurrentLocationWeather(latitude, longitude)
+        viewModel.fetchCurrentLocationWeather(latitude, longitude)
     }
-
+    /**
+     * Call API to get current location's 5 days weather forecast details
+     *  */
     private fun getFiveDaysForecastData(latitude: Double, longitude: Double) {
         LogUtils.log("getFiveDaysForecastData() $latitude, $longitude")
-        viewModel.fetchFiveDaysForecast(latitude, longitude)
+        viewModel.fetchAndSaveFiveDaysForecast(latitude, longitude)
     }
 
 
@@ -191,11 +214,17 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         }
     }
 
+    /**
+     * Removing location updates
+     *  */
     override fun onDestroy() {
         super.onDestroy()
         locationHelper.stopLocationUpdates()
     }
 
+    /**
+     * Click on Search City Item to see full weather details for that location.
+     * *  */
     override fun onItemClick(data: WeatherDataModel) {
         Utils.showToast(requireActivity(), "Navigation to details")
         val intent = Intent(requireActivity(), ForecastDetailsActivity::class.java)
@@ -203,6 +232,3 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         startActivity(intent)
     }
 }
-
-
-
