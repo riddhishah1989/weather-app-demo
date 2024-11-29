@@ -27,9 +27,6 @@ data class ForecastEntity(
     val weatherDescription: String,
     val feelsLike: Double,
     val pressure: Int,
-    val sunriseTime: Long,
-    val sunsetTime: Long,
-    val visibility: Int
-
-
+    val visibility: Int,
+    val timezone: Int
 )

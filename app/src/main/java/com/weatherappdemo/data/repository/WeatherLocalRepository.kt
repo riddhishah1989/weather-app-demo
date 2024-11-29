@@ -3,6 +3,7 @@ package com.weatherappdemo.data.repository
 import com.weatherappdemo.MyApplication
 import com.weatherappdemo.R
 import com.weatherappdemo.data.local.DBResponse
+import com.weatherappdemo.data.local.entities.ForecastEntity
 import com.weatherappdemo.data.local.entities.WeatherEntity
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.utils.toWeatherDataList
@@ -27,13 +28,13 @@ class WeatherLocalRepository private constructor() {
         }
     }
 
-    suspend fun getAllSearchedCitiesList(): DBResponse<List<WeatherDataModel>> =
+    suspend fun getAllSearchedCitiesList(): DBResponse<MutableList<WeatherDataModel>> =
         withContext(Dispatchers.IO) {
             return@withContext try {
-                val tempList = weatherDao.getAllWeatherData()
-                DBResponse.Success(tempList.toWeatherDataList())
+                val tempList = weatherDao.getAllSearchedCityList()
+                LogUtils.log("getAllSearchedCitiesList tempList Size: ${tempList.size}")
+                DBResponse.Success(tempList.toWeatherDataList().toMutableList())
             } catch (e: Exception) {
-
                 DBResponse.Error(
                     application.getString(
                         R.string.error_while_fetching_data,
@@ -47,8 +48,12 @@ class WeatherLocalRepository private constructor() {
         withContext(Dispatchers.IO) {
             return@withContext try {
                 val entity = weatherData.toWeatherEntity()
+                entity.isCurrentLocation = false
                 val existingEntry =
-                    weatherDao.getSearchedCityWeatherData(weatherData.latitude, weatherData.longitude)
+                    weatherDao.getSearchedCityData(
+                        weatherData.latitude,
+                        weatherData.longitude
+                    )
 
                 if (existingEntry != null) {
                     entity.id = existingEntry.id // Keep the same ID for the update
@@ -63,14 +68,68 @@ class WeatherLocalRepository private constructor() {
             }
         }
 
-    suspend fun getWeatherByLatLng(latitude: Double, longitude: Double): WeatherEntity? {
-        return weatherDao.getCityWeatherByLatLng(latitude, longitude)
-    }
+    suspend fun getCurrentLocationWeather(
+        latitude: Double,
+        longitude: Double
+    ): DBResponse<WeatherEntity> =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val entity = weatherDao.getCurrentLocationWeatherData(latitude, longitude)
+                DBResponse.Success(entity)
+            } catch (e: Exception) {
+                DBResponse.Error(application.getString(R.string.error_while_adding_data, e.message))
+            }
+        }
 
-    suspend fun saveWeatherData(weatherEntity: WeatherEntity) {
-        weatherDao.insertOrUpdateWeather(weatherEntity)
-    }
 
+    suspend fun saveCurrentLocationData(weatherEntity: WeatherEntity): DBResponse<String> =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                weatherEntity.isCurrentLocation = true
+                weatherDao.insertOrUpdateCurrentLocationWeather(weatherEntity)
+                DBResponse.Success("Weather data added/updated successfully")
+            } catch (e: Exception) {
+                DBResponse.Error(
+                    application.getString(
+                        R.string.error_while_adding_data,
+                        e.message
+                    )
+                )
+            }
+        }
 
+    suspend fun add5DayForecastData(list: List<ForecastEntity>): DBResponse<String> =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                weatherDao.insertForecastData(list)
 
+                DBResponse.Success("Weather data added/updated successfully")
+            } catch (e: Exception) {
+                DBResponse.Error(
+                    application.getString(
+                        R.string.error_while_adding_data,
+                        e.message
+                    )
+                )
+            }
+        }
+
+    suspend fun get5DaysForecastFromDB(
+        latitude: Double,
+        longitude: Double
+    ): DBResponse<List<ForecastEntity>> =
+        withContext(Dispatchers.IO) {
+            return@withContext try {
+                val tempList = weatherDao.getForecastListByLatLng(latitude, longitude)
+                DBResponse.Success(tempList)
+            } catch (e: Exception) {
+                DBResponse.Error(
+                    application.getString(
+                        R.string.error_while_adding_data,
+                        e.message
+                    )
+                )
+            }
+        }
 }
+

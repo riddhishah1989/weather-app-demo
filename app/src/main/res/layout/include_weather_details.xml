@@ -30,16 +30,17 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="@{weatherData.temperature + @string/degree_symbol}"
+                android:text="@{weatherData.temperature + @string/degree_symbol_celcious}"
                 tools:text="23 C" />
 
             <TextView
-                style="@style/textview_large"
+                style="@style/textview_medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="@{`H:`+ weatherData.tempMax + ` ` + `L:`+ weatherData.tempMin}"
+                android:textColor="@color/white"
                 tools:text="H:30 L:20" />
 
             <TextView

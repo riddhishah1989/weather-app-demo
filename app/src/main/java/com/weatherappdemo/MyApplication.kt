@@ -11,11 +11,12 @@ class MyApplication : Application() {
     companion object {
         lateinit var instance: MyApplication
 
-        val database: AppDatabase by lazy {
+        private val database: AppDatabase by lazy {
             Room.databaseBuilder(
                 instance.applicationContext,
-                AppDatabase::class.java, "weather-db"
-            ).build()
+                AppDatabase::class.java, "weather_database"
+            ).fallbackToDestructiveMigration()
+                .build()
         }
 
         val weatherDao: WeatherDao by lazy {

@@ -6,11 +6,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import com.weatherappdemo.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 
 object Utils {
@@ -40,18 +40,6 @@ object Utils {
         } ?: false
     }
 
-    fun showDayFromCurrentDate(): String {
-        return SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-    }
-
-    fun getWeatherIconUrl(iconName: String): String {
-        return String.format(AppConstants.WEATHER_ICON_URL, iconName)
-    }
-
-    fun formatTemperature(context: Context, temperature: Double): String {
-        val celcious = context.getString(R.string.degree_symbol_celcious)
-        return String.format("%.1f$celcious", temperature)
-    }
 
     fun formatToDayOfWeek(dateTime: String): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -69,12 +57,27 @@ object Utils {
         }
     }
 
-    fun convertUnixToAmPm(unixTime: Long): String {
-        val date = Date(unixTime * 1000) // Convert seconds to milliseconds
-        val sdf = SimpleDateFormat("h:mm a", Locale.getDefault()) // Format for AM/PM
+    fun convertUnixToAmPm(
+        utcTimestamp: Long,
+        timezoneOffset: Int
+    ): String {
+        val adjustedTimestamp = if (timezoneOffset == 0) {
+            utcTimestamp // If timezone is 0, use the timestamp directly
+        } else {
+            utcTimestamp + timezoneOffset
+        }
+        val date = Date(adjustedTimestamp * 1000)
+        val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        sdf.timeZone = if (timezoneOffset == 0) {
+            TimeZone.getDefault() // Use the device's local timezone
+        } else {
+            TimeZone.getTimeZone("UTC") // Use UTC adjusted by the offset
+        }
         return sdf.format(date)
     }
-    fun Utils.getDayDifferenceFromToday(date: String): Int {
+
+
+    fun getDayDifferenceFromToday(date: String): Int {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val parsedDate = sdf.parse(date)
         val today = Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, 0) }
@@ -83,4 +86,19 @@ object Utils {
         return inputDate.get(Calendar.DAY_OF_YEAR) - today.get(Calendar.DAY_OF_YEAR)
     }
 
+    fun formatDateTime(timestamp: Long): String {
+        val sdf = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+        return sdf.format(Date(timestamp))
+    }
+
+    fun parseDateTimeToMillis(dateString: String): Long {
+        val sdf = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+        return sdf.parse(dateString)?.time ?: 0L
+    }
+
+    fun isDataFresh(lastUpdated: Long): Boolean {
+        val currentTime = System.currentTimeMillis()
+        val freshnessThreshold = 30 * 60 * 1000 // 30 minutes in milliseconds
+        return currentTime - lastUpdated < freshnessThreshold
+    }
 }

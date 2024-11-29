@@ -41,6 +41,7 @@
                 tools:text="Virginia Beach" />
 
             <include
+                android:id="@+id/weatherDetailsLayout"
                 app:weatherData="@{weatherData}"
                 layout="@layout/include_weather_details"
                 android:layout_width="match_parent"

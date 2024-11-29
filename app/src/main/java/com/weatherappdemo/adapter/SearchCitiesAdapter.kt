@@ -3,7 +3,6 @@ package com.weatherappdemo.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.weatherappdemo.R
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.databinding.ItemSearchedCityBinding
 import com.weatherappdemo.utils.CustomInterfaces
@@ -36,6 +35,9 @@ class SearchCitiesAdapter(private val onItemClick: CustomInterfaces.OnSearchedCi
         fun bind(data: WeatherDataModel) {
             data.apply {
                 temperature = temperature.roundToInt().toDouble()
+                feelsLike = feelsLike.roundToInt().toDouble()
+                tempMax = tempMax.roundToInt().toDouble()
+                tempMin = tempMin.roundToInt().toDouble()
             }
             binding.weatherData = data
             binding.root.setOnClickListener {

@@ -1,5 +1,6 @@
 package com.weatherappdemo.data.utils
 
+import com.weatherappdemo.data.local.entities.ForecastEntity
 import com.weatherappdemo.data.local.entities.WeatherEntity
 import com.weatherappdemo.data.model.ForecastData
 import com.weatherappdemo.data.model.WeatherDataModel
@@ -7,7 +8,6 @@ import com.weatherappdemo.data.remote.webResponse.ForecastResponse
 import com.weatherappdemo.data.remote.webResponse.WeatherResponse
 import com.weatherappdemo.utils.LogUtils
 import com.weatherappdemo.utils.Utils
-import com.weatherappdemo.utils.Utils.getDayDifferenceFromToday
 
 // Conversion function from WeatherResponse to WeatherData
 fun WeatherResponse.toWeatherData() = WeatherDataModel(
@@ -29,7 +29,8 @@ fun WeatherResponse.toWeatherData() = WeatherDataModel(
     description = this.weather.firstOrNull()?.description ?: "N/A",
     icon = this.weather.firstOrNull()?.icon ?: "N/A",
     latitude = this.coord.lat,
-    longitude = this.coord.lon
+    longitude = this.coord.lon,
+    timezone = this.timezone
 )
 
 // Conversion function from WeatherData to WeatherEntity
@@ -53,7 +54,9 @@ fun WeatherDataModel.toWeatherEntity(): WeatherEntity {
         windDirection = this.windDirection,
         icon = this.icon,
         country = this.country,
-        lastUpdated = System.currentTimeMillis()
+        lastUpdated = System.currentTimeMillis(),
+        isCurrentLocation = false,
+        timezone = this.timezone
     )
 }
 
@@ -78,7 +81,8 @@ fun WeatherEntity.toWeatherData(): WeatherDataModel {
         description = this.weatherDescription,
         icon = "", // Set actual values if needed,
         latitude = this.latitude,
-        longitude = this.longitude
+        longitude = this.longitude,
+        timezone = this.timezone
 
     )
 }
@@ -86,11 +90,6 @@ fun WeatherEntity.toWeatherData(): WeatherDataModel {
 // Convert a list of WeatherEntity to a list of WeatherData
 fun List<WeatherEntity>.toWeatherDataList(): List<WeatherDataModel> {
     return this.map { it.toWeatherData() }
-}
-
-// Convert a list of WeatherData to a list of WeatherEntity
-fun List<WeatherDataModel>.toWeatherEntityList(): List<WeatherEntity> {
-    return this.map { it.toWeatherEntity() }
 }
 
 /*
@@ -109,7 +108,7 @@ fun ForecastResponse.toWeeklyForecastDataModelList(): List<ForecastData> {
         val midDayForecast = forecastItems.firstOrNull {
             it.dt_txt.contains("12:00:00")
         } ?: forecastItems.first()
-
+        val cityTimezone = this.city.timezone
         val dayLabel = when (Utils.getDayDifferenceFromToday(date)) {
             0 -> "Today"
             1 -> "Tomorrow"
@@ -133,7 +132,8 @@ fun ForecastResponse.toWeeklyForecastDataModelList(): List<ForecastData> {
                     windDirection = midDayForecast.wind.deg,
                     cloudiness = midDayForecast.clouds.all,
                     visibility = midDayForecast.visibility,
-                    probabilityOfPrecipitation = midDayForecast.pop
+                    probabilityOfPrecipitation = midDayForecast.pop,
+                    timezone = cityTimezone
                 )
             )
         }
@@ -143,27 +143,76 @@ fun ForecastResponse.toWeeklyForecastDataModelList(): List<ForecastData> {
 }
 
 
-fun WeatherResponse.toWeatherEntity(): WeatherEntity {
-    return WeatherEntity(
-        cityName = this.name,
-        country = this.sys.country,
-        temperature = this.main.temp,
-        latitude = this.coord.lat,
-        longitude = this.coord.lon,
-        weatherMain = this.weather.firstOrNull()?.main ?: "N/A",
-        weatherDescription = this.weather.firstOrNull()?.description ?: "N/A",
-        icon = this.weather.firstOrNull()?.icon ?: "",
-        humidity = this.main.humidity,
-        windSpeed = this.wind.speed,
-        windDirection = this.wind.deg,
-        tempMax = this.main.temp_max,
-        tempMin = this.main.temp_min,
-        feelLike = this.main.feels_like,
-        sunriseTime = this.sys.sunrise,
-        sunsetTime = this.sys.sunset,
-        pressure = this.main.pressure,
-        visibility = this.visibility,
-        lastUpdated = System.currentTimeMillis()
-    )
+fun ForecastResponse.toForecastEntityList(
+    latitude: Double,
+    longitude: Double
+): List<ForecastEntity> {
+    return list.map { forecast ->
+        val cityTimezone = this.city.timezone
+        ForecastEntity(
+            latitude = latitude,
+            longitude = longitude,
+            dateTime = forecast.dt * 1000L,
+            temperature = forecast.main.temp,
+            minTemperature = forecast.main.temp_min,
+            maxTemperature = forecast.main.temp_max,
+            weatherDescription = forecast.weather.firstOrNull()?.description ?: "",
+            pressure = forecast.main.pressure,
+            visibility = forecast.visibility,
+            feelsLike = forecast.main.feels_like,
+            timezone = cityTimezone
+
+        )
+    }
 }
+
+fun List<ForecastEntity>.toForecastDataList(): List<ForecastData> {
+    return this.map { entity ->
+        ForecastData(
+            dateTime = Utils.formatDateTime(entity.dateTime), // Format dateTime as needed
+            temperature = entity.temperature,
+            feelsLike = entity.feelsLike,
+            minTemperature = entity.minTemperature,
+            maxTemperature = entity.maxTemperature,
+            pressure = entity.pressure,
+            humidity = 0, // Replace with actual data if available
+            weatherMain = "", // Replace with actual data if available
+            weatherDescription = entity.weatherDescription,
+            icon = "", // Replace with actual data if available
+            windSpeed = 0.0, // Replace with actual data if available
+            windDirection = 0, // Replace with actual data if available
+            cloudiness = 0, // Replace with actual data if available
+            visibility = entity.visibility,
+            probabilityOfPrecipitation = 0.0, // Replace with actual data if available
+            timezone = entity.timezone
+
+        )
+    }
+}
+
+fun List<ForecastData>.toForecastEntityList(
+    latitude: Double,
+    longitude: Double
+): List<ForecastEntity> {
+    return this.map { data ->
+        ForecastEntity(
+            latitude = latitude,
+            longitude = longitude,
+            dateTime = Utils.parseDateTimeToMillis(data.dateTime), // Convert dateTime to millis if needed
+            temperature = data.temperature,
+            feelsLike = data.feelsLike,
+            minTemperature = data.minTemperature,
+            maxTemperature = data.maxTemperature,
+            pressure = data.pressure,
+            visibility = data.visibility,
+            weatherDescription = data.weatherDescription,
+            timezone = data.timezone
+        )
+    }
+}
+
+
+
+
+
 

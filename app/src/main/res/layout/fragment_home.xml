@@ -30,6 +30,7 @@
                 app:title="@{`Home`}" />
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/currentLocationWeatherCV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
@@ -63,7 +64,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@{weatherData.temperature + @string/degree_symbol}"
+                        android:text="@{weatherData.temperature + @string/degree_symbol_celcious}"
                         tools:text="18" />
 
                     <TextView
@@ -72,7 +73,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:text="@{`Feels Like: `+weatherData.feelsLike + @string/degree_symbol}"
+                        android:text="@{`Feels Like: `+weatherData.feelsLike + @string/degree_symbol_celcious}"
                         tools:text="Feels like: 17" />
 
                     <TextView
@@ -88,9 +89,9 @@
                         style="@style/textview_medium"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center"
                         android:gravity="center"
                         android:padding="5dp"
-                        android:layout_gravity="center"
                         android:text="@{weatherData.description}"
                         tools:text="Thursday" />
 
@@ -142,7 +143,10 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvSearchCities"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:orientation="horizontal"
+                        tools:listitem="@layout/item_searched_city" />
                 </RelativeLayout>
             </LinearLayout>
 

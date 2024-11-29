@@ -35,23 +35,34 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
     private lateinit var progressDialog: CustomProgressDialog
     private lateinit var currentLocationWeather: WeatherDataModel
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        progressDialog = CustomProgressDialog(requireActivity())
+        adapter = SearchCitiesAdapter(this)
+        forecastAdapter = WeeklyForecastAdapter()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
-        viewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
-        progressDialog = CustomProgressDialog(requireActivity())
-        init()
+        setupRecyclerViews()
+        binding.currentLocationWeatherCV.setOnClickListener {
+            val intent = Intent(requireActivity(), ForecastDetailsActivity::class.java)
+            intent.putExtra("weatherData", currentLocationWeather)
+            startActivity(intent)
+        }
         return binding.root
     }
 
-    /**
-     * Init to fetch location data, setup RecyclerViews*/
-    private fun init() {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         getLocationData()
-        setupSearchedCitiesRecyclerView()
-        setupForecastRecyclerView()
+        setUpObservers()
     }
+
 
     /**
      * Requesting location permission from user
@@ -73,12 +84,14 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
             requireActivity(),
             requestPermissionLauncher
         ) { latitude, longitude ->
-            Utils.showToast(requireActivity(), "Lat = $latitude, long = $longitude")
+            //Utils.showToast(requireActivity(), "Lat = $latitude, long = $longitude")
             setUpObservers()
-            getWeatherDataByLocation(latitude, longitude)
-            getFiveDaysForecastData(latitude, longitude)
+            viewModel.fetchAndSaveCurrentLocationWeather(latitude, longitude)
+            viewModel.fetchAndSaveFiveDaysForecast(latitude, longitude)
+            viewModel.getAllSearchedCitiesList() // Fetch searched cities
         }
     }
+
     /**
      * setup observers for live updates and update UI
      *  */
@@ -97,9 +110,6 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
             when (apiResponse) {
                 is APIResponse.Success -> {
                     currentLocationWeather = apiResponse.data
-                    LogUtils.log(message = "Data = $currentLocationWeather")
-                    LogUtils.log("data = ${currentLocationWeather.feelsLike}, ${currentLocationWeather.tempMax}, ${currentLocationWeather.tempMin}")
-                    //data = 17.86, 19.43, 16.38
                     currentLocationWeather.apply {
                         temperature = temperature.roundToInt().toDouble()
                         feelsLike = feelsLike.roundToInt().toDouble()
@@ -121,12 +131,10 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
 
             when (dbResponse) {
                 is DBResponse.Success -> {
-                    LogUtils.log("Success")
                     if (dbResponse.data.isNotEmpty()) {
                         binding.tvNoDataFound.visibility = View.GONE
                         adapter.addData(dbResponse.data)
                     } else {
-                        LogUtils.log("No data found")
                         binding.tvNoDataFound.visibility = View.VISIBLE
                     }
                 }
@@ -151,8 +159,6 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
             progressDialog.dismiss()
             when (apiResponse) {
                 is APIResponse.Success -> {
-                    // Update RecyclerView with the weekly forecast
-                    LogUtils.log("Size ${apiResponse.data.size}")
                     forecastAdapter.addData(apiResponse.data)
                 }
 
@@ -163,46 +169,20 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
         }
     }
 
-    /**
-     * Initialise recylerview for searched cities list.
-     *  */
-    private fun setupSearchedCitiesRecyclerView() {
-        adapter = SearchCitiesAdapter(this)
+
+    private fun setupRecyclerViews() {
         binding.rvSearchCities.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.HORIZONTAL
             isSmoothScrollbarEnabled = true
         }
         binding.rvSearchCities.adapter = adapter
 
-        viewModel.getAllSearchedCitiesList() // Fetch favourite cities
-
-
-    }
-    /**
-     * Initialise recylerview for 5 days forecast list.
-     *  */
-    private fun setupForecastRecyclerView() {
-        forecastAdapter = WeeklyForecastAdapter()
         binding.rvUpcomingForcast.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = LinearLayoutManager.VERTICAL
             isSmoothScrollbarEnabled = true
         }
         binding.rvUpcomingForcast.adapter = forecastAdapter
     }
-    /**
-     * Call API to get current location weather details
-     *  */
-    private fun getWeatherDataByLocation(latitude: Double, longitude: Double) {
-        viewModel.fetchCurrentLocationWeather(latitude, longitude)
-    }
-    /**
-     * Call API to get current location's 5 days weather forecast details
-     *  */
-    private fun getFiveDaysForecastData(latitude: Double, longitude: Double) {
-        LogUtils.log("getFiveDaysForecastData() $latitude, $longitude")
-        viewModel.fetchAndSaveFiveDaysForecast(latitude, longitude)
-    }
-
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -217,16 +197,23 @@ class HomeFragment : Fragment(), CustomInterfaces.OnSearchedCityItemClick {
     /**
      * Removing location updates
      *  */
-    override fun onDestroy() {
-        super.onDestroy()
-        locationHelper.stopLocationUpdates()
+    override fun onStop() {
+        super.onStop()
+        locationHelper.stopLocationUpdates() // Stop updates
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.getCurrentWeather.removeObservers(viewLifecycleOwner)
+        viewModel.getSearchedCitiesList.removeObservers(viewLifecycleOwner)
+        viewModel.fiveDaysForecast.removeObservers(viewLifecycleOwner)
+    }
+
 
     /**
      * Click on Search City Item to see full weather details for that location.
      * *  */
     override fun onItemClick(data: WeatherDataModel) {
-        Utils.showToast(requireActivity(), "Navigation to details")
         val intent = Intent(requireActivity(), ForecastDetailsActivity::class.java)
         intent.putExtra("weatherData", data)
         startActivity(intent)

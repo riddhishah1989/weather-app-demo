@@ -8,11 +8,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.weatherappdemo.R
 import com.weatherappdemo.adapter.WeeklyForecastAdapter
-import com.weatherappdemo.data.local.DBResponse
 import com.weatherappdemo.data.model.WeatherDataModel
 import com.weatherappdemo.data.remote.api.APIResponse
 import com.weatherappdemo.databinding.ActivityForecastDetailsBinding
-import com.weatherappdemo.utils.LogUtils
 import com.weatherappdemo.utils.Utils
 import com.weatherappdemo.viewmodel.WeatherViewModel
 
@@ -44,10 +42,17 @@ class ForecastDetailsActivity : AppCompatActivity() {
     }
 
     private fun init() {
+        binding.topBar.ivBack.setOnClickListener {
+            finish()
+        }
         binding.weatherData = weatherData
+        binding.weatherDetailsLayout.tvSunrise.text =
+            Utils.convertUnixToAmPm(weatherData.sunrise, weatherData.timezone)
+        binding.weatherDetailsLayout.tvSunset.text =
+            Utils.convertUnixToAmPm(weatherData.sunset, weatherData.timezone)
         setupForecastRecyclerView()
         setUpObservers()
-        viewModel.fetchAndSaveFiveDaysForecast(weatherData.latitude, weatherData.longitude)
+        viewModel.fetchCityFiveDaysForecast(weatherData.latitude, weatherData.longitude)
     }
 
     private fun setupForecastRecyclerView() {
@@ -60,20 +65,9 @@ class ForecastDetailsActivity : AppCompatActivity() {
     }
 
     private fun setUpObservers() {
-        viewModel.getSearchedCityData.observe(this) { dbResponse ->
-            when (dbResponse) {
-                is DBResponse.Success -> {
-
-                }
-
-                is DBResponse.Error -> {}
-            }
-        }
-        viewModel.fiveDaysForecast.observe(this) { apiResponse ->
+        viewModel.cityFiveDaysForecast.observe(this) { apiResponse ->
             when (apiResponse) {
                 is APIResponse.Success -> {
-                    // Update RecyclerView with the weekly forecast
-                    LogUtils.log("Size ${apiResponse.data.size}")
                     forecastAdapter.addData(apiResponse.data)
                 }
 

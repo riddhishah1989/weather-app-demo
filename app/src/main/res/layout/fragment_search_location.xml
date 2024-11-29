@@ -31,24 +31,39 @@
                 app:showHideTitle="@{true}"
                 app:title="@{`Search City`}" />
 
-            <!-- Search City Field -->
-            <EditText
-                android:id="@+id/edtSearchCity"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:background="@drawable/edit_text_rounded_corner"
-                android:drawableStart="@drawable/ic_search"
-                android:drawablePadding="8dp"
-                android:hint="Search city"
-                android:imeActionLabel="Search"
-                android:imeOptions="actionSearch"
-                android:inputType="text"
-                android:maxLines="1"
-                android:padding="12dp"
-                android:textColor="@color/white"
-                android:textColorHint="@color/white"
-                android:textSize="16sp" />
+                android:padding="12dp">
+
+                <EditText
+                    android:id="@+id/edtSearchCity"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:drawableStart="@drawable/ic_search"
+                    android:drawablePadding="8dp"
+                    android:hint="Search for a city"
+                    android:imeActionLabel="Search"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/ivClear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_clear"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
 
 
             <TextView
@@ -74,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:visibility="gone">
+                android:visibility="@{weatherData != null ? View.VISIBLE : View.GONE}">
 
                 <TextView
                     android:id="@+id/tvNoDataFoundForecast"
@@ -88,7 +103,8 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvForecastData"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+                    android:layout_height="match_parent"
+                    android:visibility="@{weatherData != null ? View.VISIBLE : View.GONE}" />
             </RelativeLayout>
 
 

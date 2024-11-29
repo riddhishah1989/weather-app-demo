@@ -16,7 +16,7 @@ interface APIServices {
     ): Response<WeatherResponse>
 
     @GET("forecast?")
-    suspend fun getWeatherForecast(
+    suspend fun get5DayForecast(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
         @Query("appid") apiKey: String = ApiConstants.WEATHER_API_KEY,

@@ -12,15 +12,15 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:layout_margin="8dp"
         app:cardBackgroundColor="@color/colorPrimaryDark"
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="80dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="8dp">
@@ -30,6 +30,8 @@
                 style="@style/textview_medium_bold"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
                 android:text="@{weatherData.temperature + @string/degree_symbol}"
                 tools:text="17" />
 
@@ -39,10 +41,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:ellipsize="end"
                 android:gravity="center"
+                android:singleLine="true"
                 android:text="@{weatherData.cityName}"
                 tools:text="Virginia Beach" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
 
 </layout>

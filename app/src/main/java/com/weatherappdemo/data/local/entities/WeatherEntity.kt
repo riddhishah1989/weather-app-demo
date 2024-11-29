@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-// WeatherEntity.kt
 @Entity(
     tableName = "weather_table",
     indices = [Index(value = ["latitude", "longitude"], unique = true)]
@@ -30,7 +29,9 @@ data class WeatherEntity(
     val sunsetTime: Long,
     val pressure: Int,
     val visibility: Int,
-    val lastUpdated: Long // timestamp for last update
+    val timezone: Int,
+    val lastUpdated: Long, // timestamp for last update
+    var isCurrentLocation: Boolean
 )
 
 

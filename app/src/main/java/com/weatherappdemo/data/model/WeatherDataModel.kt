@@ -21,5 +21,6 @@ data class WeatherDataModel(
     val description: String,
     val icon: String,
     var latitude: Double,
-    var longitude: Double
+    var longitude: Double,
+    var timezone: Int
 ) : Serializable
