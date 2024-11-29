@@ -1,4 +1,4 @@
 # weather-app-demo
 Weather APP Demo
 
-This is a demo app for weather forecasts. Using the best standard practice, this app demonstrates the MVVM pattern, Room Database, and Retrofit API calling using Kotlin and Coroutine.
+This demo weather forecast app showcases best practices in Android development. It demonstrates the implementation of the MVVM architecture pattern, Room Database, and Retrofit for API calls, utilizing Kotlin and Coroutines for efficient and modern development.
