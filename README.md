@@ -13,8 +13,6 @@ This is a demo weather forecast app that showcases best practices in modern Andr
 
 📍 Location-Based Weather: Fetches weather data based on the user's current location.
 
-🔄 Periodic Updates: Weather data is refreshed automatically after 30 minutes to ensure it remains up-to-date.
-
 🛠️ Error Handling: Displays appropriate error messages for scenarios like no internet connection or invalid search queries.
 
 # Technologies Used
