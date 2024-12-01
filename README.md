@@ -41,4 +41,3 @@ This app uses the OpenWeatherMap API to fetch weather data.
 
 # Folder Structure
 ![image](https://github.com/user-attachments/assets/30765fa1-45f6-446e-8de6-2a934b04165a)
-
